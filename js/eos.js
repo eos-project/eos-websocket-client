@@ -1,6 +1,7 @@
 define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits) {
 
     var EosKeySchema = /^([a-z]+):\/\/([^:]+)/i;
+    var EosDefaultId = 'default';
 
     /**
      * EosKey object
@@ -34,14 +35,55 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
      * @constructor
      */
     function EosLogEntry(key, data) {
-        this.key  = key;
-        this.data = data;
+        this.key     = key;
+        this.data    = data;
+        this.message = data;
+        this.index   = 1;
         try {
             this.object = JSON.parse(data);
+            this.message = this.object.message;
+            this._id = this.object["eos-id"];
         } catch (e) {
             this.object = {};
         }
+        this.receivedAt = new Date();
     }
+
+    /**
+     * Returns id
+     *
+     * @returns {string}
+     */
+    EosLogEntry.prototype.getId = function getId() {
+        if (this._id) {
+            return this._id;
+        } else {
+            return EosDefaultId;
+        }
+    };
+
+    EosLogEntry.prototype.getShortMessage = function getShortMessage() {
+        return this.message;
+    };
+
+    /**
+     *
+     * @param {string} id
+     * @constructor
+     */
+    function EosLogGroup(id) {
+        this.id    = id;
+        this.items = [];
+        this.count = 0;
+    }
+
+    /**
+     * @param {EosLogEntry} entry
+     */
+    EosLogGroup.prototype.add = function add(entry) {
+        this.count++;
+        this.items.push(entry);
+    };
 
     /**
      * Main Eos service
@@ -122,7 +164,16 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
      * @param {EosLogEntry} entry
      */
     Eos.prototype.addLogEntry = function addLogEntry(entry) {
+        var id    = entry.getId();
+        var group = this.groups[id];
+        if (!group) {
+            group = new EosLogGroup(id);
+            this.groups[id] = group;
+        }
 
+        group.add(entry);
+        entry.index = group.count;
+        this.emit("newLogEntry", {entry: entry, group: group});
     };
 
     return new Eos();

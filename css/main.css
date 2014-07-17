@@ -1,0 +1,28 @@
+body {margin: 0; padding: 0; background-color: #111; color: white;}
+
+/*
+Colors:
+
+Orange: #fb660a
+Pink: #ff0086
+Lime: #a6e22e
+Cyan: #66d9ef
+*/
+
+#logWindow {font: normal 15px "Ubuntu Mono", monospace;}
+#logWindow .group .header {padding: 5px; cursor: pointer;}
+#logWindow .group .header:hover { background-color: rgba(255, 255, 255, 0.1); cursor: pointer; }
+#logWindow .group .header > .title {font-weight: bold; color: white;}
+#logWindow .group .header > .toggle { color: #fb660a; display: none;}
+#logWindow .group .header > .count { color: #66d9ef; }
+#logWindow .group .header > .count::before { content: " ["; color: #AAA;}
+#logWindow .group .header > .count::after { content: "]"; color: #AAA;}
+#logWindow .hiddenGroup .entry { display: none; }
+#logWindow .hiddenGroup .header > .toggle { display: inline; }
+
+#logWindow .group .entry {margin-left: 5px;}
+#logWindow .group .entry span.index { color: #999999; }
+#logWindow .group .entry span.time { color: #ff0086; font-weight: bold; }
+#logWindow .group .entry span.time::before { content: " ["; color: #AAA;}
+#logWindow .group .entry span.time::after { content: "] "; color: #AAA;}
+#logWindow .group .entry span.message { color: #a6e22e; font-weight: bold; }

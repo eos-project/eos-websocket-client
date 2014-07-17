@@ -18,15 +18,20 @@ require(
     [
         'jquery',
         'underscore',
-        'eos'
+        'eos',
+        'ui'
     ],
-    function ($, _, eos) {
-        console.log("Yahoo");
-        console.log(eos);
+    function ($, _, eos, ui) {
+
+        // Binding UI
+        ui.logWindow = $('#logWindow');
 
         // Registering events
         eos.on("log", function(payload) { console.debug(payload); });
         eos.on("debug", function(payload) { console.debug(payload); });
+        eos.on("newLogEntry", function(data) {
+            ui.addNewLogEntry(data.entry, data.group);
+        });
 
         eos.connect("127.0.0.1", 8090);
     }
