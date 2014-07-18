@@ -29,7 +29,7 @@ define(['underscore', 'jquery'], function(_, $) {
      * @returns {*}
      */
     ui.buildGroup = function buildGroup(name) {
-        var x = $("<div></div>").addClass("group");
+        var x = $("<div></div>").addClass("group").addClass("hiddenGroup");
         x.attr("id", name);
 
         var title = $("<div></div>").addClass("header").appendTo(x);
