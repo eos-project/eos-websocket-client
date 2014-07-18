@@ -13,12 +13,16 @@ Cyan: #66d9ef
 #logWindow .group .header {padding: 5px; cursor: pointer;}
 #logWindow .group .header:hover { background-color: rgba(255, 255, 255, 0.1); cursor: pointer; }
 #logWindow .group .header > .title {font-weight: bold; color: white;}
-#logWindow .group .header > .toggle { color: #fb660a; display: none;}
+#logWindow .group .header > .time { font-weight: bold; color: #ff0086; }
+#logWindow .group .header:hover > .time { color: #ff0086; }
+#logWindow .group .header > .time::before { content: " ["; }
+#logWindow .group .header > .time::after { content: "] "; }
+#logWindow .group .header > .toggle { color: #fb660a; visibility: hidden;}
 #logWindow .group .header > .count { color: #66d9ef; }
 #logWindow .group .header > .count::before { content: " ["; color: #AAA;}
 #logWindow .group .header > .count::after { content: "]"; color: #AAA;}
 #logWindow .hiddenGroup .entry { display: none; }
-#logWindow .hiddenGroup .header > .toggle { display: inline; }
+#logWindow .hiddenGroup .header > .toggle { visibility: visible; }
 
 #logWindow .group .entry {margin-left: 5px;}
 #logWindow .group .entry span.index { color: #999999; }

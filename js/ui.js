@@ -34,6 +34,7 @@ define(['underscore', 'jquery'], function(_, $) {
 
         var title = $("<div></div>").addClass("header").appendTo(x);
         $("<span></span>").addClass("toggle").click(ui.toggleGroup).text(" [...] ").appendTo(title);
+        $("<span></span>").addClass("time").click(ui.toggleGroup).text("...").appendTo(title);
         $("<span></span>").addClass("title").click(ui.toggleGroup).text(name).appendTo(title);
         $("<span></span>").addClass("count").click(ui.toggleGroupDetails).appendTo(title);
         x.appendTo(ui.logWindow);
@@ -72,7 +73,10 @@ define(['underscore', 'jquery'], function(_, $) {
      */
     ui.addNewLogEntry = function addNewLogEntry(entry, group) {
         var gDom = ui.getGroup(group.id);
-        gDom.find(".count").text(group.count);
+        gDom.children(".header").children(".count").text(group.count);
+        gDom.children(".header").children(".time").text(
+            entry.receivedAt.getHours() + ":" + entry.receivedAt.getMinutes() + ":" + entry.receivedAt.getSeconds()
+        );
         ui.buildLogEntry(entry).appendTo(gDom);
     };
 
