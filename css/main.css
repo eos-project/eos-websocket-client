@@ -22,7 +22,27 @@ Cyan: #66d9ef
 
 #logWindow .group .entry {margin-left: 5px;}
 #logWindow .group .entry span.index { color: #999999; }
-#logWindow .group .entry span.time { color: #ff0086; font-weight: bold; }
+#logWindow .group .entry span.exception { color: #E00; }
+#logWindow .group .entry span.exception::before { content: " [";}
+#logWindow .group .entry span.exception::after { content: "] ";}
+#logWindow .group .entry span.time { color: #999999; font-weight: bold; cursor: pointer;}
+#logWindow .group .entry:hover span.time { color: #ff0086; }
 #logWindow .group .entry span.time::before { content: " ["; color: #AAA;}
 #logWindow .group .entry span.time::after { content: "] "; color: #AAA;}
-#logWindow .group .entry span.message { color: #a6e22e; font-weight: bold; }
+#logWindow .group .entry span.message { color: #AAA; font-weight: bold; }
+
+#logWindow .group .entry .details { margin-left: 10px; border-left: 7px solid #222; padding: 0 5px 15px 5px; }
+#logWindow .group .entry .details .var-value { color: #a6e22e; }
+#logWindow .group .entry .details .var-value-sql {color: #887CAF; }
+#logWindow .group .entry .details .var-value-int {color: #66d9ef; }
+#logWindow .group .entry .details .var-value-float {color: #66d9ef; }
+#logWindow .group .entry .details .var-name {color: #fb660a;}
+#logWindow .group .entry .details .var-name::before { content: " ["; color: #AAA; }
+#logWindow .group .entry .details .var-name::after { content: "] "; color: #AAA; }
+#logWindow .group .entry .details .var-name-internal {color: #ff0086;}
+#logWindow .group .entry .details .var-name-internal::before { content: " ["; color: #AAA; }
+#logWindow .group .entry .details .var-name-internal::after { content: "] "; color: #AAA; }
+#logWindow .group .entry .details .var-value-exception { color: #E00; }
+#logWindow .group .entry .details .var-trace-line { color: #66d9ef; font-weight: bold; }
+#logWindow .group .entry .details .var-trace-line::after { content: "  @ file "; color: #AAA; }
+#logWindow .group .entry .details .var-trace-file { color: white; font-weight: bold; }

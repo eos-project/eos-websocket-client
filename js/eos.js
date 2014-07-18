@@ -1,7 +1,8 @@
 define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits) {
 
     var EosKeySchema = /^([a-z]+):\/\/([^:]+)/i;
-    var EosDefaultId = 'default';
+    var EosDefaultId = '--default--';
+    var EosLoggingKey = new EosKey("log://eos");
 
     /**
      * EosKey object
@@ -31,7 +32,7 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
      * Eos log entry constructor
      *
      * @param {EosKey} key
-     * @param {string} data
+     * @param {string|object} data
      * @constructor
      */
     function EosLogEntry(key, data) {
@@ -39,13 +40,17 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
         this.data    = data;
         this.message = data;
         this.index   = 1;
-        try {
-            this.object = JSON.parse(data);
-            this.message = this.object.message;
-            this._id = this.object["eos-id"];
-        } catch (e) {
-            this.object = {};
+        if (_.isString(data)) {
+            try {
+                this.object = JSON.parse(data);
+            } catch (e) {
+                this.object = {};
+            }
+        } else {
+            this.object = data;
         }
+        this.message = (!this.object.message) ? this.data : this.object.message;
+        this._id = this.object["eos-id"];
         this.receivedAt = new Date();
     }
 
@@ -65,6 +70,10 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
     EosLogEntry.prototype.getShortMessage = function getShortMessage() {
         return this.message;
     };
+
+    EosLogEntry.prototype.hasException = function hasException() {
+        return this.object && this.object.exception;
+    }
 
     /**
      *
@@ -114,22 +123,27 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
         this.socket = new WebSocket(uri);
         this.socket.onopen  = function(){
             self.connected = true;
-            self.emit("log", "Successfully connected to " + uri);
+            self.logSelf("Successfully connected to " + uri);
             self.emit("connected");
         };
         this.socket.onerror = function(){
-            self.emit("log", "Connection failed");
+            self.logSelf("Connection failed");
             self.emit("connectionError");
         };
         this.socket.onclose   = this.disconnect.bind(this);
         this.socket.onmessage = this.onWebsocketMessage.bind(this);
     };
 
+    Eos.prototype.logSelf = function logSelf(msg) {
+        this.emit("log", msg);
+        this.addLogEntry(new EosLogEntry(EosLoggingKey, {'message': msg, 'eos-id': 'eos'}));
+    }
+
     /**
      * Disconnects from server
      */
     Eos.prototype.disconnect = function disconnect() {
-        this.emit("log", "Disconnecting");
+        this.logSelf("Disconnecting");
         if (this.connected) {
             this.connected = false;
             this.socket.close();
@@ -154,7 +168,7 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
             this.emit("debug", entry);
             this.addLogEntry(entry);
         } else {
-            this.emit("log", "Unknown schema " + key.schema);
+            this.logSelf("Unknown schema " + key.schema);
         }
     };
 

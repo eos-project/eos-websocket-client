@@ -1,8 +1,8 @@
 require.config({
     baseUrl: 'js',
     paths: {
-        jquery: '//cdn.jsdelivr.net/jquery/2.1.1/jquery.min',
-        underscore: '//cdn.jsdelivr.net/underscorejs/1.6.0/underscore-min',
+        jquery: 'http://cdn.jsdelivr.net/jquery/2.1.1/jquery.min',
+        underscore: 'http://cdn.jsdelivr.net/underscorejs/1.6.0/underscore-min',
         eventemitter: 'lib/eventemitter2',
         inherits: 'lib/inherits',
         eos: 'eos'
@@ -27,8 +27,8 @@ require(
         ui.logWindow = $('#logWindow');
 
         // Registering events
-        eos.on("log", function(payload) { console.debug(payload); });
-        eos.on("debug", function(payload) { console.debug(payload); });
+//        eos.on("log", function(payload) { console.debug(payload); });
+//        eos.on("debug", function(payload) { console.debug(payload); });
         eos.on("newLogEntry", function(data) {
             ui.addNewLogEntry(data.entry, data.group);
         });
