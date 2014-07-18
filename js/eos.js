@@ -67,15 +67,26 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
         }
     };
 
+    /**
+     * Returns short message to display in brief listing
+     *
+     * @returns {string}
+     */
     EosLogEntry.prototype.getShortMessage = function getShortMessage() {
         return this.message;
     };
 
+    /**
+     * Returns true if current entry has information about exception
+     *
+     * @returns {boolean}
+     */
     EosLogEntry.prototype.hasException = function hasException() {
         return this.object && this.object.exception;
-    }
+    };
 
     /**
+     * Constructor of Eos log entries group
      *
      * @param {string} id
      * @constructor
@@ -87,6 +98,8 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
     }
 
     /**
+     * Adds new log entry to group
+     *
      * @param {EosLogEntry} entry
      */
     EosLogGroup.prototype.add = function add(entry) {
@@ -134,10 +147,15 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
         this.socket.onmessage = this.onWebsocketMessage.bind(this);
     };
 
+    /**
+     * Utility function to log health information
+     *
+     * @param msg
+     */
     Eos.prototype.logSelf = function logSelf(msg) {
         this.emit("log", msg);
         this.addLogEntry(new EosLogEntry(EosLoggingKey, {'message': msg, 'eos-id': 'eos'}));
-    }
+    };
 
     /**
      * Disconnects from server

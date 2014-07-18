@@ -1,9 +1,18 @@
 define(['underscore', 'jquery'], function(_, $) {
 
+    /**
+     * UI object
+     */
     var ui = {
         logWindow: null
     };
 
+    /**
+     * Returns or creates group
+     *
+     * @param {string} name Log group name
+     * @returns {*}
+     */
     ui.getGroup = function getGroup(name) {
         var x = ui.logWindow.find("#" + name);
         if (x.size() === 0) {
@@ -13,6 +22,12 @@ define(['underscore', 'jquery'], function(_, $) {
         return x;
     };
 
+    /**
+     * Builds and returns DOM for group
+     *
+     * @param name
+     * @returns {*}
+     */
     ui.buildGroup = function buildGroup(name) {
         var x = $("<div></div>").addClass("group");
         x.attr("id", name);
@@ -26,6 +41,12 @@ define(['underscore', 'jquery'], function(_, $) {
         return x;
     };
 
+    /**
+     * Builds and return DOM for log entry
+     *
+     * @param {EosLogEntry} entry
+     * @returns {*}
+     */
     ui.buildLogEntry = function buildLogEntry(entry) {
         var dom = $('<div></div>').addClass("entry");
         dom.data("entry", entry);
@@ -43,15 +64,28 @@ define(['underscore', 'jquery'], function(_, $) {
         return dom;
     };
 
+    /**
+     * Adds log entry to group
+     *
+     * @param {EosLogEntry} entry
+     * @param {EosLogGroup} group
+     */
     ui.addNewLogEntry = function addNewLogEntry(entry, group) {
         var gDom = ui.getGroup(group.id);
         gDom.find(".count").text(group.count);
         ui.buildLogEntry(entry).appendTo(gDom);
     };
 
+    /**
+     * Callback, that toggles visibility of group
+     */
     ui.toggleGroup = function toggleGroup() {
         $(this).parent().parent().toggleClass("hiddenGroup");
     };
+
+    /**
+     * Callback, that toggles visibility of details inside group
+     */
     ui.toggleGroupDetails = function toggleGroupDetails() {
         var details = $(this).parent().parent().find('.entry .details');
         if (details.size() > 0) {
@@ -61,6 +95,9 @@ define(['underscore', 'jquery'], function(_, $) {
         }
     };
 
+    /**
+     * Callback, that toggles visibility of details inside log entry
+     */
     ui.toggleEntry = function toggleEntry() {
         var o = $(this).parent();
         var entry = o.data('entry');
@@ -71,8 +108,14 @@ define(['underscore', 'jquery'], function(_, $) {
         } else {
             details.remove();
         }
-    }
+    };
 
+    /**
+     * Builds and returns DOM of log entry details
+     *
+     * @param {EosLogEntry} entry
+     * @returns {*}
+     */
     ui.buildEntryDetails = function buildEntryDetails(entry) {
         var dom = $('<div></div>').addClass("details");
 
@@ -117,7 +160,7 @@ define(['underscore', 'jquery'], function(_, $) {
         }
 
         return dom;
-    }
+    };
 
     return ui;
 });
