@@ -4,19 +4,20 @@ define(['underscore', 'jquery'], function(_, $) {
      * UI object
      */
     var ui = {
-        logWindow: null
+        logWindow: null,
+        util: {}
     };
 
     /**
      * Returns or creates group
      *
-     * @param {string} name Log group name
+     * @param {EosLogGroup} group
      * @returns {*}
      */
-    ui.getGroup = function getGroup(name) {
-        var x = ui.logWindow.find("#" + name);
+    ui.getGroup = function getGroup(group) {
+        var x = ui.logWindow.find("#" + group.id);
         if (x.size() === 0) {
-            x = ui.buildGroup(name);
+            x = ui.buildGroup(group);
         }
 
         return x;
@@ -25,21 +26,64 @@ define(['underscore', 'jquery'], function(_, $) {
     /**
      * Builds and returns DOM for group
      *
-     * @param name
+     * @param {EosLogGroup} group
      * @returns {*}
      */
-    ui.buildGroup = function buildGroup(name) {
-        var x = $("<div></div>").addClass("group").addClass("hiddenGroup");
-        x.attr("id", name);
+    ui.buildGroup = function buildGroup(group) {
+        var x = $("<div></div>").addClass("group");
+        x.attr("id", group.id);
+        x.data("group", group);
 
         var title = $("<div></div>").addClass("header").appendTo(x);
-        $("<span></span>").addClass("toggle").click(ui.toggleGroup).text(" [...] ").appendTo(title);
-        $("<span></span>").addClass("time").click(ui.toggleGroup).text("...").appendTo(title);
-        $("<span></span>").addClass("title").click(ui.toggleGroup).text(name).appendTo(title);
-        $("<span></span>").addClass("count").click(ui.toggleGroupDetails).appendTo(title);
+        $("<span></span>").addClass("box").addClass("time").text("<time>").appendTo(title);
+        $("<span></span>").addClass("title").text(group.id + " ").appendTo(title);
+        $("<span></span>")
+            .addClass("box")
+            .addClass("toggle")
+            .addClass("entries")
+            .click(ui.toggleSimpleLogList)
+            .html("rec <span class='count'></span>")
+            .appendTo(title);
+        $("<span></span>")
+            .addClass("box")
+            .addClass("toggle")
+            .addClass("errors")
+            .click(ui.toggleErrorLogList)
+            .html("err <span class='count'></span>")
+            .appendTo(title);
+        $("<span></span>")
+            .addClass("box")
+            .addClass("toggle")
+            .addClass("sql")
+            .click(ui.toggleSqlLogList)
+            .html("sql <span class='count'></span>")
+            .appendTo(title);
         x.appendTo(ui.logWindow);
 
         return x;
+    };
+
+    /**
+     * Updates group information
+     *
+     * @param {EosLogGroup} group
+     */
+    ui.updateGroup = function updateGroup(group) {
+        var groupDom = ui.getGroup(group);
+
+        // Updating count ticker
+        groupDom.children(".header").children(".entries").children(".count").text(group.count);
+
+        // Updating count ticker
+        groupDom.children(".header").find(".errors > .count").text(group.errorsCount);
+        groupDom.children(".header").find(".errors").css("display", group.errorsCount === 0 ? "none" : "inline");
+
+        // Updating count ticker
+        groupDom.children(".header").find(".sql > .count").text(group.sqlCount);
+        groupDom.children(".header").find(".sql").css("display", group.sqlCount === 0 ? "none" : "inline");
+
+        // Updating time ticker
+        groupDom.children(".header").children(".time").text(ui.util.formatTimeForGroup(group.lastReceivedAt));
     };
 
     /**
@@ -54,7 +98,7 @@ define(['underscore', 'jquery'], function(_, $) {
         $('<span></span>').addClass("index").text(entry.index + ". ").appendTo(dom);
         $('<span></span>')
             .addClass("time")
-            .text(entry.receivedAt.getSeconds() + "." + entry.receivedAt.getMilliseconds())
+            .text(ui.util.formatTimeForEntry(entry.receivedAt))
             .click(ui.toggleEntry)
             .appendTo(dom);
         if (entry.hasException()) {
@@ -65,32 +109,107 @@ define(['underscore', 'jquery'], function(_, $) {
         return dom;
     };
 
+    ui.buildSqlEntry = function buildSqlEntry(entry) {
+        var dom = $('<div></div>').addClass("entry");
+        dom.data("entry", entry);
+        $('<span></span>').addClass("index").text(entry.index + ". ").appendTo(dom);
+        $('<span></span>')
+            .addClass("time")
+            .text(ui.util.formatTimeForEntry(entry.receivedAt))
+            .click(ui.toggleEntry)
+            .appendTo(dom);
+        if (entry.hasPerformanceLog()) {
+            $("<span class='var-value-float box'>" + ui.util.millisTime(entry.object.time) + "</span>").appendTo(dom);
+        }
+        $("<span class='var-value-sql'>" + entry.object.sql + "</span>").appendTo(dom);
+        return dom;
+    }
+
     /**
-     * Adds log entry to group
+     * Hides group details
      *
-     * @param {EosLogEntry} entry
-     * @param {EosLogGroup} group
+     * @param {object} groupDom
      */
-    ui.addNewLogEntry = function addNewLogEntry(entry, group) {
-        var gDom = ui.getGroup(group.id);
-        gDom.children(".header").children(".count").text(group.count);
-        gDom.children(".header").children(".time").text(
-            entry.receivedAt.getHours() + ":" + entry.receivedAt.getMinutes() + ":" + entry.receivedAt.getSeconds()
-        );
-        ui.buildLogEntry(entry).appendTo(gDom);
+    ui.hideGroupChilds = function hideGroupChilds(groupDom) {
+        groupDom.find('.content').remove();
     };
 
     /**
-     * Callback, that toggles visibility of group
+     * Shows simple log list
      */
-    ui.toggleGroup = function toggleGroup() {
-        $(this).parent().parent().toggleClass("hiddenGroup");
+    ui.toggleSimpleLogList = function toggleGroup() {
+        var groupDom = $(this).parent().parent();
+        var group    = groupDom.data('group');
+        var content  = groupDom.find('.content');
+        if (content.size() === 1 && content.attr('type') == 'simple') {
+            ui.hideGroupChilds(groupDom);
+        } else {
+            ui.hideGroupChilds(groupDom);
+            content = $("<div></div>").addClass("content").attr("type", "simple").appendTo(groupDom);
+            var panel = $("<div></div>").addClass("contentPanel").appendTo(content);
+            $("<span></span>").addClass("box").text("Toggle expand").click(ui.toggleSimpleLogListDetails).appendTo(panel);
+
+            // Building
+            for (var i=0; i < group.items.length; i++) {
+                ui.buildLogEntry(group.items[i]).appendTo(content);
+            }
+        }
+    };
+
+    /**
+     * Shows SQL log list
+     */
+    ui.toggleSqlLogList = function toggleSqlLogList() {
+        var groupDom = $(this).parent().parent();
+        var group    = groupDom.data('group');
+        var content  = groupDom.find('.content');
+        if (content.size() === 1 && content.attr('type') == 'sql') {
+            ui.hideGroupChilds(groupDom);
+        } else {
+            ui.hideGroupChilds(groupDom);
+            content = $("<div></div>").addClass("content").attr("type", "sql").appendTo(groupDom);
+            var panel = $("<div></div>").addClass("contentPanel").appendTo(content);
+            $("<span></span>").addClass("box").text("Toggle expand").click(ui.toggleSimpleLogListDetails).appendTo(panel);
+
+            // Building
+            for (var i=0; i < group.items.length; i++) {
+                if (!group.items[i].hasSql()) {
+                    continue;
+                }
+                ui.buildSqlEntry(group.items[i]).appendTo(content);
+            }
+        }
+    };
+
+    /**
+     * Shows Error log list
+     */
+    ui.toggleErrorLogList = function toggleErrorLogList() {
+        var groupDom = $(this).parent().parent();
+        var group    = groupDom.data('group');
+        var content  = groupDom.find('.content');
+        if (content.size() === 1 && content.attr('type') == 'error') {
+            ui.hideGroupChilds(groupDom);
+        } else {
+            ui.hideGroupChilds(groupDom);
+            content = $("<div></div>").addClass("content").attr("type", "error").appendTo(groupDom);
+            var panel = $("<div></div>").addClass("contentPanel").appendTo(content);
+            $("<span></span>").addClass("box").text("Toggle expand").click(ui.toggleSimpleLogListDetails).appendTo(panel);
+
+            // Building
+            for (var i=0; i < group.items.length; i++) {
+                if (!group.items[i].hasException()) {
+                    continue;
+                }
+                ui.buildLogEntry(group.items[i]).appendTo(content);
+            }
+        }
     };
 
     /**
      * Callback, that toggles visibility of details inside group
      */
-    ui.toggleGroupDetails = function toggleGroupDetails() {
+    ui.toggleSimpleLogListDetails = function toggleSimpleLogListDetails() {
         var details = $(this).parent().parent().find('.entry .details');
         if (details.size() > 0) {
             details.remove();
@@ -134,7 +253,7 @@ define(['underscore', 'jquery'], function(_, $) {
 
             if (entry.object.time || entry.object.count) {
                 if (entry.object.time) {
-                    $("<span class='var-name'>Time</span><span class='var-value-float'>" + entry.object.time + "</span>").appendTo(dom);
+                    $("<span class='var-name'>Time</span><span class='var-value-float'>" + ui.util.millisTime(entry.object.time) + "</span>").appendTo(dom);
                 }
                 if (typeof entry.object.count != 'undefined') {
                     $("<span class='var-name'>Count</span><span class='var-value-int'>" + entry.object.count + "</span>").appendTo(dom);
@@ -165,6 +284,52 @@ define(['underscore', 'jquery'], function(_, $) {
 
         return dom;
     };
+
+    /**
+     * Formats time using default Eos formatter
+     *
+     * @param {Date} date
+     */
+    ui.util.formatTimeForGroup = function formatTimeForGroup(date) {
+        return ui.util.lz(date.getHours()) + ":" + ui.util.lz(date.getMinutes()) + ":" + ui.util.lz(date.getSeconds());
+    };
+
+    /**
+     * Formats time delta
+     *
+     * @param {float} floatTime
+     */
+    ui.util.millisTime = function millisTime(floatTime) {
+        if (floatTime > 5) {
+            return floatTime.toFixed(1);
+        } else if (floatTime > 0.01) {
+            return floatTime.toFixed(3);
+        } else {
+            return floatTime.toFixed(4);
+        }
+    }
+
+    /**
+     * Formats time using default Eos formatter
+     *
+     * @param {Date} date
+     */
+    ui.util.formatTimeForEntry = function formatTimeForEntry(date) {
+        return  ui.util.lz(date.getSeconds()) + "." + ui.util.lz(date.getMilliseconds(), 3);
+    };
+
+    /**
+     * Utility method to insert leading zeroes
+     *
+     * @param {int} num
+     * @param {int} places
+     * @returns {string}
+     */
+    ui.util.lz = function lz(num, places) {
+        if (!places) places = 2;
+        var zero = places - num.toString().length + 1;
+        return new Array(+(zero > 0 && zero)).join("0") + num;
+    }
 
     return ui;
 });

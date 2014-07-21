@@ -9,22 +9,31 @@ Lime: #a6e22e
 Cyan: #66d9ef
 */
 
+#connectWindow { padding: 3px 10px; border-bottom: 3px solid #222222; }
+#connectWindow .logo { font: normal 18px "Ubuntu Mono", monospace; color: #a6e22e; display: inline-block; }
+#connectWindow input[type="text"] { color: #fb660a; border: 0; background-color: transparent; font: normal 18px "Ubuntu Mono", monospace; width: 50%; }
+#connectWindow input[type="text"]:disabled { color: #a6e22e; }
+#connectWindow input[type="button"] { color: #fb660a; border: 0; background-color: transparent; font: normal 18px "Ubuntu Mono", monospace; cursor: pointer; }
+
 #logWindow {font: normal 15px "Ubuntu Mono", monospace;}
-#logWindow .group .header {padding: 5px; cursor: pointer;}
-#logWindow .group .header:hover { background-color: rgba(255, 255, 255, 0.1); cursor: pointer; }
+#logWindow .group .header {padding: 0 5px; }
+#logWindow .group .header:hover { background-color: rgba(255, 255, 255, 0.1); }
 #logWindow .group .header > .title {font-weight: bold; color: white;}
 #logWindow .group .header > .time { font-weight: bold; color: #ff0086; }
 #logWindow .group .header:hover > .time { color: #ff0086; }
-#logWindow .group .header > .time::before { content: " ["; }
-#logWindow .group .header > .time::after { content: "] "; }
-#logWindow .group .header > .toggle { color: #fb660a; visibility: hidden;}
-#logWindow .group .header > .count { color: #66d9ef; }
-#logWindow .group .header > .count::before { content: " ["; color: #AAA;}
-#logWindow .group .header > .count::after { content: "]"; color: #AAA;}
-#logWindow .hiddenGroup .entry { display: none; }
-#logWindow .hiddenGroup .header > .toggle { visibility: visible; }
+#logWindow .box { display: inline-block; margin-right: .5em; }
+#logWindow .box::before { content: "["; }
+#logWindow .box::after { content: "]"; }
+#logWindow .group .header > .toggle { color: #fb660a; cursor: pointer; }
+#logWindow .group .header > .toggle > .count { color: #66d9ef; }
+#logWindow .group .header > .toggle:hover { background-color: #fb660a; color: white; }
+#logWindow .group .header > .toggle:hover > .count { color: white; }
+#logWindow .group .content { margin: 0 0 10px .5em; border-left: .5em solid #fb660a; padding-left: .5em; }
 
-#logWindow .group .entry {margin-left: 5px;}
+#logWindow .group .contentPanel > span { color: #fb660a; cursor: pointer; }
+#logWindow .group .contentPanel > span:hover { background-color: #fb660a; color: white; }
+
+#logWindow .group .entry {margin-left: 5px; white-space: nowrap;}
 #logWindow .group .entry span.index { color: #999999; }
 #logWindow .group .entry span.exception { color: #E00; }
 #logWindow .group .entry span.exception::before { content: " [";}
@@ -36,17 +45,17 @@ Cyan: #66d9ef
 #logWindow .group .entry span.message { color: #AAA; font-weight: bold; }
 
 #logWindow .group .entry .details { margin-left: 10px; border-left: 7px solid #222; padding: 0 5px 15px 5px; }
-#logWindow .group .entry .details .var-value { color: #a6e22e; }
-#logWindow .group .entry .details .var-value-sql {color: #887CAF; }
-#logWindow .group .entry .details .var-value-int {color: #66d9ef; }
-#logWindow .group .entry .details .var-value-float {color: #66d9ef; }
-#logWindow .group .entry .details .var-name {color: #fb660a;}
-#logWindow .group .entry .details .var-name::before { content: " ["; color: #AAA; }
-#logWindow .group .entry .details .var-name::after { content: "] "; color: #AAA; }
-#logWindow .group .entry .details .var-name-internal {color: #ff0086;}
-#logWindow .group .entry .details .var-name-internal::before { content: " ["; color: #AAA; }
-#logWindow .group .entry .details .var-name-internal::after { content: "] "; color: #AAA; }
-#logWindow .group .entry .details .var-value-exception { color: #E00; }
-#logWindow .group .entry .details .var-trace-line { color: #66d9ef; font-weight: bold; }
-#logWindow .group .entry .details .var-trace-line::after { content: "  @ file "; color: #AAA; }
-#logWindow .group .entry .details .var-trace-file { color: white; font-weight: bold; }
+#logWindow .group .entry .var-value { color: #a6e22e; }
+#logWindow .group .entry .var-value-sql {color: #887CAF; }
+#logWindow .group .entry .var-value-int {color: #66d9ef; }
+#logWindow .group .entry .var-value-float {color: #66d9ef; }
+#logWindow .group .entry .var-name {color: #fb660a;}
+#logWindow .group .entry .var-name::before { content: " ["; color: #AAA; }
+#logWindow .group .entry .var-name::after { content: "] "; color: #AAA; }
+#logWindow .group .entry .var-name-internal {color: #ff0086;}
+#logWindow .group .entry .var-name-internal::before { content: " ["; color: #AAA; }
+#logWindow .group .entry .var-name-internal::after { content: "] "; color: #AAA; }
+#logWindow .group .entry .var-value-exception { color: #E00; }
+#logWindow .group .entry .var-trace-line { color: #66d9ef; font-weight: bold; }
+#logWindow .group .entry .var-trace-line::after { content: "  @ file "; color: #AAA; }
+#logWindow .group .entry .var-trace-file { color: white; font-weight: bold; }

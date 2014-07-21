@@ -24,15 +24,35 @@ require(
     function ($, _, eos, ui) {
 
         // Binding UI
-        ui.logWindow = $('#logWindow');
+        ui.logWindow     = $('#logWindow');
+        var dsnInput      = $('#dsn');
+        var connectButton = $('#connect');
+
+        dsnInput.val("127.0.0.1:8090");
+        connectButton.click(function(){
+            if (eos.connected) {
+                eos.disconnect();
+            } else {
+                var split = dsnInput.val().split(":");
+                eos.connect(split[0], split[1]);
+            }
+        });
 
         // Registering events
 //        eos.on("log", function(payload) { console.debug(payload); });
 //        eos.on("debug", function(payload) { console.debug(payload); });
+        eos.on("disconnect", function(){
+            dsnInput.prop('disabled', false);
+            connectButton.attr("value", "connect");
+        });
+        eos.on("connected", function(){
+            dsnInput.prop('disabled', true);
+            connectButton.attr("value", "disconnect");
+        });
         eos.on("newLogEntry", function(data) {
-            ui.addNewLogEntry(data.entry, data.group);
+            ui.updateGroup(data.group);
         });
 
-        eos.connect("127.0.0.1", 8090);
+        eos.disconnect();
     }
 );

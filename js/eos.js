@@ -86,15 +86,40 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
     };
 
     /**
+     * Returns true if current entry has raw SQL
+     *
+     * @returns {boolean}
+     */
+    EosLogEntry.prototype.hasSql = function hasSql() {
+        return this.object && this.object.sql;
+    };
+
+    /**
+     * Returns true if current entry has raw performance info
+     *
+     * @returns {boolean}
+     */
+    EosLogEntry.prototype.hasPerformanceLog = function hasPerformanceLog() {
+        return this.object && this.object.time;
+    };
+
+    /**
      * Constructor of Eos log entries group
      *
      * @param {string} id
      * @constructor
      */
     function EosLogGroup(id) {
-        this.id    = id;
-        this.items = [];
-        this.count = 0;
+        this.id     = id;
+        this.items  = [];
+        this.count  = 0;
+
+        this.sqlCount    = 0;
+        this.errorsCount = 0;
+        this.performance = 0;
+
+        this.firstReceivedAt = new Date();
+        this.lastReceivedAt = new Date();
     }
 
     /**
@@ -104,6 +129,16 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
      */
     EosLogGroup.prototype.add = function add(entry) {
         this.count++;
+        this.lastReceivedAt = entry.receivedAt;
+        if (entry.hasException()) {
+            this.errorsCount++;
+        }
+        if (entry.hasSql()) {
+            this.sqlCount++;
+        }
+        if (entry.hasPerformanceLog()) {
+            this.performance += entry.object.perf;
+        }
         this.items.push(entry);
     };
 
@@ -150,11 +185,12 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
     /**
      * Utility function to log health information
      *
-     * @param msg
+     * @param {string} msg
+     * @param {object} object
      */
-    Eos.prototype.logSelf = function logSelf(msg) {
+    Eos.prototype.logSelf = function logSelf(msg, object) {
         this.emit("log", msg);
-        this.addLogEntry(new EosLogEntry(EosLoggingKey, {'message': msg, 'eos-id': 'eos'}));
+        this.addLogEntry(new EosLogEntry(EosLoggingKey, {'message': msg, 'eos-id': 'eos', 'object': object}));
     };
 
     /**
@@ -162,6 +198,7 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
      */
     Eos.prototype.disconnect = function disconnect() {
         this.logSelf("Disconnecting");
+        this.emit("disconnect");
         if (this.connected) {
             this.connected = false;
             this.socket.close();
