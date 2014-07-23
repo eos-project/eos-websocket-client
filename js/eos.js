@@ -207,6 +207,14 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
     };
 
     /**
+     * Clear Eos log entries group
+     */
+    Eos.prototype.clear = function clear() {
+        this.groups = {};
+        this.logSelf('Cleared');
+    }
+
+    /**
      * Function, called on incoming packet
      */
     Eos.prototype.onWebsocketMessage = function onWebsocketMessage(packet) {

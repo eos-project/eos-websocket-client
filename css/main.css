@@ -13,7 +13,7 @@ Cyan: #66d9ef
 #connectWindow .logo { font: normal 18px "Ubuntu Mono", monospace; color: #a6e22e; display: inline-block; }
 #connectWindow input[type="text"] { color: #fb660a; border: 0; background-color: transparent; font: normal 18px "Ubuntu Mono", monospace; width: 50%; }
 #connectWindow input[type="text"]:disabled { color: #a6e22e; }
-#connectWindow input[type="button"] { color: #fb660a; border: 0; background-color: transparent; font: normal 18px "Ubuntu Mono", monospace; cursor: pointer; }
+#connectWindow input[type="button"] { color: #fb660a; border: 1; border-color: grey; border-radius: 5px; background-color: transparent; font: normal 18px "Ubuntu Mono", monospace; cursor: pointer; }
 
 #logWindow {font: normal 15px "Ubuntu Mono", monospace;}
 #logWindow .group .header {padding: 0 5px; }
@@ -59,3 +59,5 @@ Cyan: #66d9ef
 #logWindow .group .entry .var-trace-line { color: #66d9ef; font-weight: bold; }
 #logWindow .group .entry .var-trace-line::after { content: "  @ file "; color: #AAA; }
 #logWindow .group .entry .var-trace-file { color: white; font-weight: bold; }
+
+#clearButton { color: #fb660a; background-color: transparent; font: normal 18px "Ubuntu Mono", monospace; cursor: pointer; border-radius: 5px; border:1; border-color: grey;}

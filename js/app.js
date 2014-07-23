@@ -27,6 +27,7 @@ require(
         ui.logWindow     = $('#logWindow');
         var dsnInput      = $('#dsn');
         var connectButton = $('#connect');
+        var clearButton = $('#clearButton');
 
         dsnInput.val("127.0.0.1:8090");
         connectButton.click(function(){
@@ -36,6 +37,11 @@ require(
                 var split = dsnInput.val().split(":");
                 eos.connect(split[0], split[1]);
             }
+        });
+
+        clearButton.click(function() {
+            ui.logWindow.empty();
+            eos.clear();
         });
 
         // Registering events
