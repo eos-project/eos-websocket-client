@@ -114,6 +114,8 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
         this.items  = [];
         this.count  = 0;
 
+        this.sharedTags = null;
+
         this.sqlCount    = 0;
         this.errorsCount = 0;
         this.performance = 0;
@@ -139,7 +141,34 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
         if (entry.hasPerformanceLog()) {
             this.performance += entry.object.perf;
         }
+
+        // Registering shared tags
+        if (entry.key.tags) {
+            // Entry has tags
+            if (this.sharedTags === null) {
+                this.sharedTags = entry.key.tags;
+            } else if (this.sharedTags.length === 0) {
+                // Do nothing - intersection empty already
+            } else {
+                // Calculating intersection
+                this.sharedTags = _.intersection(this.sharedTags, entry.key.tags);
+            }
+        }
+
         this.items.push(entry);
+    };
+
+    /**
+     * Returns list of shared tags in group
+     *
+     * @return {string[]}
+     */
+    EosLogGroup.prototype.getSharedTags = function getSharedTags() {
+        if (this.sharedTags) {
+            return this.sharedTags;
+        } else {
+            return [];
+        }
     };
 
     /**
@@ -186,7 +215,7 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
      * Utility function to log health information
      *
      * @param {string} msg
-     * @param {object} object
+     * @param {object=} object
      */
     Eos.prototype.logSelf = function logSelf(msg, object) {
         this.emit("log", msg);
@@ -205,14 +234,6 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
             this.socket = null;
         }
     };
-
-    /**
-     * Clear Eos log entries group
-     */
-    Eos.prototype.clear = function clear() {
-        this.groups = {};
-        this.logSelf('Cleared');
-    }
 
     /**
      * Function, called on incoming packet

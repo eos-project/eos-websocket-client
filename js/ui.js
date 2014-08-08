@@ -58,6 +58,9 @@ define(['underscore', 'jquery'], function(_, $) {
             .click(ui.toggleSqlLogList)
             .html("sql <span class='count'></span>")
             .appendTo(title);
+        $("<span></span>")
+            .addClass("sharedTags")
+            .appendTo(title);
         x.appendTo(ui.logWindow);
 
         return x;
@@ -84,6 +87,9 @@ define(['underscore', 'jquery'], function(_, $) {
 
         // Updating time ticker
         groupDom.children(".header").children(".time").text(ui.util.formatTimeForGroup(group.lastReceivedAt));
+
+        // Updating shared tags
+        groupDom.children(".header").find(".sharedTags").text(group.getSharedTags().join(", "));
     };
 
     /**

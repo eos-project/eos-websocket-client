@@ -29,6 +29,7 @@ Cyan: #66d9ef
 #logWindow .group .header > .toggle:hover { background-color: #fb660a; color: white; }
 #logWindow .group .header > .toggle:hover > .count { color: white; }
 #logWindow .group .content { margin: 0 0 10px .5em; border-left: .5em solid #fb660a; padding-left: .5em; }
+#logWindow .group .header .sharedTags { color: #66d9ef; }
 
 #logWindow .group .contentPanel > span { color: #fb660a; cursor: pointer; }
 #logWindow .group .contentPanel > span:hover { background-color: #fb660a; color: white; }
