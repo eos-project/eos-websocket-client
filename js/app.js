@@ -45,7 +45,7 @@ require(
         });
 
         // Setting test
-        clearButton.text('clear');
+        clearButton.attr("value", 'clear');
 
         // Registering events
 //        eos.on("log", function(payload) { console.debug(payload); });
