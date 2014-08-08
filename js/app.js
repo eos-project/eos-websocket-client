@@ -24,10 +24,10 @@ require(
     function ($, _, eos, ui) {
 
         // Binding UI
-        ui.logWindow     = $('#logWindow');
+        ui.logWindow      = $('#logWindow');
         var dsnInput      = $('#dsn');
         var connectButton = $('#connect');
-        var clearButton = $('#clearButton');
+        var clearButton   = $('#clearButton');
 
         dsnInput.val("127.0.0.1:8090");
         connectButton.click(function(){
@@ -43,6 +43,9 @@ require(
             ui.logWindow.empty();
             eos.clear();
         });
+
+        // Setting test
+        clearButton.text('clear');
 
         // Registering events
 //        eos.on("log", function(payload) { console.debug(payload); });
