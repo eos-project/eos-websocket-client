@@ -29,7 +29,6 @@ require(
         var connectButton = $('#connect');
         var clearButton   = $('#clearButton');
 
-        dsnInput.val("127.0.0.1:8090");
         connectButton.click(function(){
             if (eos.connected) {
                 eos.disconnect();
@@ -44,8 +43,10 @@ require(
             eos.clear();
         });
 
-        // Setting test
+        // Setting values
         clearButton.attr("value", 'clear');
+        dsnInput.val("127.0.0.1:8090");
+
 
         // Registering events
 //        eos.on("log", function(payload) { console.debug(payload); });
@@ -55,6 +56,10 @@ require(
             connectButton.attr("value", "connect");
         });
         eos.on("connected", function(){
+            if (Storage && localStorage) {
+                // Saving connection dsn to local storage
+                localStorage.setItem("lastDsn", dsnInput.val());
+            }
             dsnInput.prop('disabled', true);
             connectButton.attr("value", "disconnect");
         });
@@ -63,5 +68,11 @@ require(
         });
 
         eos.disconnect();
+        if (Storage && localStorage && localStorage.getItem("lastDsn")) {
+            // Reading previous successful dsn
+            eos.logSelf("Reading previous success dsn " + localStorage.getItem("lastDsn"));
+            dsnInput.val(localStorage.getItem("lastDsn"));
+        }
+
     }
 );
