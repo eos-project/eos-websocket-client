@@ -293,7 +293,7 @@ define(['underscore', 'jquery'], function(_, $) {
         if (entry.exception) {
             $("<span class='var-name'>Exception</span><span class='var-value-exception'>" + entry.exception.message + "</span><br />").appendTo(dom);
             $("<span class='var-name'>Exception place</span><span class='var-value-exception'>" + entry.exception.line + "@" + entry.exception.file + "</span><br />").appendTo(dom);
-            for (var i=0; i < entry.object.exception.trace.length; i++ ) {
+            for (var i=0; i < entry.exception.trace.length; i++ ) {
                 $("<span class='var-trace-line'></span>").text(entry.exception.trace[i].line).appendTo(dom);
                 $("<span class='var-trace-file'></span>").text(entry.exception.trace[i].file).appendTo(dom);
                 $("<br />").appendTo(dom);
