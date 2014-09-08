@@ -25,7 +25,7 @@ Cyan: #66d9ef
 #logWindow .group .header > .toggle > .count { color: #66d9ef; }
 #logWindow .group .header > .toggle:hover { background-color: #fb660a; color: white; }
 #logWindow .group .header > .toggle:hover > .count { color: white; }
-#logWindow .group .header .exposed > span {background-color: lime; color: black; display: inline-block; margin: 0 5px; padding: 2px 4px; border-radius: 5px; font-size: 13px; font-weight: bold;}
+#logWindow .group .header .exposed > span {color: lime; display: inline-block; margin: 0 5px; padding: 2px 4px; border-radius: 5px; font-size: 13px; font-weight: bold;}
 #logWindow .group .content { margin: 0 0 10px .5em; border-left: .5em solid #fb660a; padding-left: .5em; }
 #logWindow .group .header .sharedTags { color: #66d9ef; }
 
