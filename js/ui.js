@@ -274,7 +274,6 @@ define(['underscore', 'jquery'], function(_, $) {
         var dom = $('<div></div>').addClass("details");
 
         $("<span class='var-name-internal'>Eos ID</span><span class='var-value'>" + entry.tracking + "</span><br />").appendTo(dom);
-        $("<span class='var-name-internal'>Key</span><span class='var-value'>" + entry.key.key + "</span><br />").appendTo(dom);
         if (entry.key.tags.length > 0) {
             $("<span class='var-name-internal'>Tags</span><span class='var-value'>" + entry.key.tags.join(", ") + "</span><br />").appendTo(dom);
         }

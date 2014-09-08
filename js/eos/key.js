@@ -1,18 +1,16 @@
 define(['underscore'], function(_) {
 
-    var EosKeySchema = /^([a-z]+):\/\/([^:]+)/i;
+    var EosKeySchema = /^([a-z]+):\/\/(.+)/i;
 
     /**
      * EosKey object
      *
      * @param {string}    schema
-     * @param {string}    key
      * @param {string[]=} tags
      * @constructor
      */
-    function EosKey(schema, key, tags) {
+    function EosKey(schema, tags) {
         this.schema = schema ? schema : null;
-        this.key    = key ? key : null;
         this.tags   = tags && _.isArray(tags) ? tags : [];
     }
 
@@ -34,8 +32,7 @@ define(['underscore'], function(_) {
 
         return new EosKey(
             m[1],
-            m[2],
-            source.replace(EosKeySchema, "").trim().split(":").filter(function(x){ return x !== ""; })
+            m[2].trim().split(":").filter(function(x){ return x !== ""; })
         );
     };
 
