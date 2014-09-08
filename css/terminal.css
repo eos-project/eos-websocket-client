@@ -1,5 +1,3 @@
-body {margin: 0; padding: 0; background-color: #111; color: white;}
-
 /*
 Colors:
 
@@ -9,13 +7,12 @@ Lime: #a6e22e
 Cyan: #66d9ef
 */
 
-#connectWindow { padding: 3px 10px; border-bottom: 3px solid #222222; }
-#connectWindow .logo { font: normal 18px "Ubuntu Mono", monospace; color: #a6e22e; display: inline-block; }
-#connectWindow input[type="text"] { color: #fb660a; border: 0; background-color: transparent; font: normal 18px "Ubuntu Mono", monospace; width: 50%; }
-#connectWindow input[type="text"]:disabled { color: #a6e22e; }
-#connectWindow input[type="button"] { color: #fb660a; border: 1; border-color: grey; border-radius: 5px; background-color: transparent; font: normal 18px "Ubuntu Mono", monospace; cursor: pointer; }
+#tagWindow {float: right; width: 200px; font: bold 15px "Ubuntu Mono", monospace;}
+#tagWindow div {color: #ff0086; cursor: pointer; display: inline-block; margin: 3px;}
+#tagWindow div.enabled {background-color: #fb660a; color: black;}
+#tagWindow div:hover {color: white;}
 
-#logWindow {font: normal 15px "Ubuntu Mono", monospace;}
+#logWindow {font: normal 15px "Ubuntu Mono", monospace; margin-right: 210px;}
 #logWindow .group .header {padding: 0 5px; }
 #logWindow .group .header:hover { background-color: rgba(255, 255, 255, 0.1); }
 #logWindow .group .header > .title {font-weight: bold; color: white;}
@@ -28,6 +25,7 @@ Cyan: #66d9ef
 #logWindow .group .header > .toggle > .count { color: #66d9ef; }
 #logWindow .group .header > .toggle:hover { background-color: #fb660a; color: white; }
 #logWindow .group .header > .toggle:hover > .count { color: white; }
+#logWindow .group .header .exposed > span {background-color: lime; color: black; display: inline-block; margin: 0 5px; padding: 2px 4px; border-radius: 5px; font-size: 13px; font-weight: bold;}
 #logWindow .group .content { margin: 0 0 10px .5em; border-left: .5em solid #fb660a; padding-left: .5em; }
 #logWindow .group .header .sharedTags { color: #66d9ef; }
 
@@ -60,5 +58,3 @@ Cyan: #66d9ef
 #logWindow .group .entry .var-trace-line { color: #66d9ef; font-weight: bold; }
 #logWindow .group .entry .var-trace-line::after { content: "  @ file "; color: #AAA; }
 #logWindow .group .entry .var-trace-file { color: white; font-weight: bold; }
-
-#clearButton { color: #fb660a; background-color: transparent; font: normal 18px "Ubuntu Mono", monospace; cursor: pointer; border-radius: 5px; border:1; border-color: grey;}

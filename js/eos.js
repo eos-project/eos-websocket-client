@@ -1,175 +1,63 @@
-define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits) {
-
-    var EosKeySchema = /^([a-z]+):\/\/([^:]+)/i;
-    var EosDefaultId = '--default--';
-    var EosLoggingKey = new EosKey("log://eos");
+define(
+    ['underscore', 'eventemitter', 'inherits', 'sha256', 'eoslogentry', 'eoskey', 'eosloggroup'],
+    function(_, emitter, inherits, sha, EosLogEntry, EosKey, EosLogGroup)
+{
 
     /**
-     * EosKey object
+     * List of tags
      *
-     * @param source
      * @constructor
      */
-    function EosKey(source) {
-        if (!_.isString(source)) {
-            throw "Not valid key source provided";
-        }
-
-        this.src = source;
-
-        var m = EosKeySchema.exec(source);
-        if (!m) {
-            throw "Cannot parse schema";
-        }
-        this.schema = m[1];
-        this.key    = m[2];
-        this.tags   = source.replace(EosKeySchema, "").trim().split(":").filter(function(x){ return x !== ""; });
+    function EosTagPool () {
+        this._pool = [];
+        this._map  = {};
     }
 
-
-
     /**
-     * Eos log entry constructor
+     * Adds new tag(s) to pool
      *
-     * @param {EosKey} key
-     * @param {string|object} data
-     * @constructor
+     * @param {string|string[]} tag
+     * @return {boolean} Returns true if tag added, false (already exists) otherwise
      */
-    function EosLogEntry(key, data) {
-        this.key     = key;
-        this.data    = data;
-        this.message = data;
-        this.index   = 1;
-        if (_.isString(data)) {
-            try {
-                this.object = JSON.parse(data);
-            } catch (e) {
-                this.object = {};
+    EosTagPool.prototype.add = function add(tag) {
+        if (!tag) {
+            return false;
+        }
+
+        if (_.isArray(tag)) {
+            var added = false;
+            for (var i=0; i < tag.length; i++) {
+                added = this.add(tag[i]) || added;
             }
-        } else {
-            this.object = data;
-        }
-        this.message = (!this.object.message) ? this.data : this.object.message;
-        this._id = this.object["eos-id"];
-        this.receivedAt = new Date();
-    }
-
-    /**
-     * Returns id
-     *
-     * @returns {string}
-     */
-    EosLogEntry.prototype.getId = function getId() {
-        if (this._id) {
-            return this._id;
-        } else {
-            return EosDefaultId;
-        }
-    };
-
-    /**
-     * Returns short message to display in brief listing
-     *
-     * @returns {string}
-     */
-    EosLogEntry.prototype.getShortMessage = function getShortMessage() {
-        return this.message;
-    };
-
-    /**
-     * Returns true if current entry has information about exception
-     *
-     * @returns {boolean}
-     */
-    EosLogEntry.prototype.hasException = function hasException() {
-        return this.object && this.object.exception;
-    };
-
-    /**
-     * Returns true if current entry has raw SQL
-     *
-     * @returns {boolean}
-     */
-    EosLogEntry.prototype.hasSql = function hasSql() {
-        return this.object && this.object.sql;
-    };
-
-    /**
-     * Returns true if current entry has raw performance info
-     *
-     * @returns {boolean}
-     */
-    EosLogEntry.prototype.hasPerformanceLog = function hasPerformanceLog() {
-        return this.object && this.object.time;
-    };
-
-    /**
-     * Constructor of Eos log entries group
-     *
-     * @param {string} id
-     * @constructor
-     */
-    function EosLogGroup(id) {
-        this.id     = id;
-        this.items  = [];
-        this.count  = 0;
-
-        this.sharedTags = null;
-
-        this.sqlCount    = 0;
-        this.errorsCount = 0;
-        this.performance = 0;
-
-        this.firstReceivedAt = new Date();
-        this.lastReceivedAt = new Date();
-    }
-
-    /**
-     * Adds new log entry to group
-     *
-     * @param {EosLogEntry} entry
-     */
-    EosLogGroup.prototype.add = function add(entry) {
-        this.count++;
-        this.lastReceivedAt = entry.receivedAt;
-        if (entry.hasException()) {
-            this.errorsCount++;
-        }
-        if (entry.hasSql()) {
-            this.sqlCount++;
-        }
-        if (entry.hasPerformanceLog()) {
-            this.performance += entry.object.perf;
+            return added;
         }
 
-        // Registering shared tags
-        if (entry.key.tags) {
-            // Entry has tags
-            if (this.sharedTags === null) {
-                this.sharedTags = entry.key.tags;
-            } else if (this.sharedTags.length === 0) {
-                // Do nothing - intersection empty already
-            } else {
-                // Calculating intersection
-                this.sharedTags = _.intersection(this.sharedTags, entry.key.tags);
-            }
+        if (this._map.hasOwnProperty(tag)) {
+            return false;
         }
 
-        this.items.push(entry);
+        // Adding tag, which is enabled by default
+        this._map[tag] = true;
+        this._pool.push(tag);
+        this._pool.sort();
+        return true;
     };
 
-    /**
-     * Returns list of shared tags in group
-     *
-     * @return {string[]}
-     */
-    EosLogGroup.prototype.getSharedTags = function getSharedTags() {
-        if (this.sharedTags) {
-            return this.sharedTags;
-        } else {
-            return [];
+    EosTagPool.prototype.getList = function getList() {
+        return this._pool;
+    };
+
+    EosTagPool.prototype.isEnabled = function isEnabled(tag) {
+        return tag && this._map.hasOwnProperty(tag) && this._map[tag];
+    };
+
+    EosTagPool.prototype.toggle = function toggle(tag) {
+        if (tag && this._map.hasOwnProperty(tag)) {
+            this._map[tag] = !this._map[tag];
         }
     };
+
+
 
     /**
      * Main Eos service
@@ -182,33 +70,52 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
         this.socket    = null;
         this.connected = false;
         this.groups    = {};
+        this._tagpool  = new EosTagPool();
     }
     inherits(Eos, emitter);
 
     /**
      * Connects to websocket server
      *
-     * @param server
-     * @param port
+     * @param {string} server
+     * @param {*}      port
+     * @param {string} tag
+     * @param {string} realm
+     * @param {string} secret
      */
-    Eos.prototype.connect = function connect(server, port) {
+    Eos.prototype.connect = function connect(server, port, tag, realm, secret) {
         this.disconnect();
+        this.realm  = realm;
+        this.secret = secret;
+        this.tag    = tag;
 
         var uri  = "ws://" + server + ":" + port;
         var self = this;
         this.emit("log", "Connecting to " + uri);
         this.socket = new WebSocket(uri);
-        this.socket.onopen  = function(){
+        this.socket.onopen  = function onopen(){
             self.connected = true;
             self.logSelf("Successfully connected to " + uri);
-            self.emit("connected");
+            self.logSelf("Sending credentials");
         };
-        this.socket.onerror = function(){
+        this.socket.onerror = function onerror(){
             self.logSelf("Connection failed");
             self.emit("connectionError");
         };
         this.socket.onclose   = this.disconnect.bind(this);
         this.socket.onmessage = this.onWebsocketMessage.bind(this);
+    };
+
+    /**
+     * Returns array of data used on handshaking
+     */
+    Eos.prototype.getHandshakePacket = function getHandShakePacket()
+    {
+        var nonce   = new Date();
+        var payload = this.tag;
+        var hash    = sha.SHA256(nonce + payload + this.secret);
+
+        return ["subscribe", this.realm , nonce, payload, hash];
     };
 
     /**
@@ -219,7 +126,7 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
      */
     Eos.prototype.logSelf = function logSelf(msg, object) {
         this.emit("log", msg);
-        this.addLogEntry(new EosLogEntry(EosLoggingKey, {'message': msg, 'eos-id': 'eos', 'object': object}));
+        this.addLogEntry(EosLogEntry.internalLog(msg));
     };
 
     /**
@@ -242,18 +149,59 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
         this.emit("debug", "Received packet");
         this.emit("debug", packet);
 
-        // Splitting
-        var parts = packet.data.split("\n");
-        var key   = new EosKey(parts.shift());
-        var data  = parts.join("\n");
-
-        if (key.schema === 'log') {
-            var entry = new EosLogEntry(key, data);
-            this.emit("debug", entry);
-            this.addLogEntry(entry);
-        } else {
-            this.logSelf("Unknown schema " + key.schema);
+        var chunks = packet.data.split("\n");
+        switch (chunks[0]) {
+            case "uuid":
+                return this.onPacketUuid(chunks.slice(1));
+            case "log":
+                return this.onPacketLog(chunks.slice(1));
+            case "error":
+                return this.onPacketError(chunks.slice(1));
+            case "connected":
+                this.emit("connected");
+                return null;
+            default:
+                this.emit("error", "Unknown packet received");
+                return null;
         }
+    };
+
+    /**
+     * Function, invoked when UUID operation received from server
+     * In common, it's auth request
+     *
+     * @param packet
+     */
+    Eos.prototype.onPacketUuid = function onPacketUuid(packet) {
+        this.uuid = packet[0];
+        this.logSelf("Auth UUID is " + this.uuid);
+        this.socket.send(this.getHandshakePacket().join("\n"));
+    };
+
+    /**
+     * Function, invoked when error received
+     *
+     * @param packet
+     */
+    Eos.prototype.onPacketError = function onPacketError(packet) {
+        this.logSelf("Error: " + packet[0]);
+    };
+
+    /**
+     * Function, invoked on incoming LOG entry
+     *
+     * @param {string[]} packet
+     * @return {EosLogEntry}
+     */
+    Eos.prototype.onPacketLog = function onPacketLog(packet) {
+        var key  = EosKey.parse(packet.shift());
+        var data = packet.join("\n");
+
+        var entry = EosLogEntry.parse(key, data);
+        this.emit("debug", entry);
+        this.addLogEntry(entry);
+
+        return entry;
     };
 
     /**
@@ -262,7 +210,7 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
      * @param {EosLogEntry} entry
      */
     Eos.prototype.addLogEntry = function addLogEntry(entry) {
-        var id    = entry.getId();
+        var id    = entry.tracking;
         var group = this.groups[id];
         if (!group) {
             group = new EosLogGroup(id);
@@ -272,6 +220,12 @@ define(['underscore', 'eventemitter', 'inherits'], function(_, emitter, inherits
         group.add(entry);
         entry.index = group.count;
         this.emit("newLogEntry", {entry: entry, group: group});
+
+        if (entry.key.tags.length > 0) {
+            if (this._tagpool.add(entry.key.tags)) {
+                this.emit("newTag", this._tagpool);
+            }
+        }
     };
 
     return new Eos();

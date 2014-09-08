@@ -5,7 +5,20 @@ define(['underscore', 'jquery'], function(_, $) {
      */
     var ui = {
         logWindow: null,
+        tagWindow: null,
         util: {}
+    };
+
+    /**
+     * @param {EosTagPool} tagPool
+     */
+    ui.rebuildTagsList = function rebuildTagsList(tagPool) {
+        ui.tagWindow.empty();
+
+        var list = tagPool.getList();
+        for (var i=0; i < list.length; i++) {
+            $("<div></div>").text(list[i]).addClass(tagPool.isEnabled(list[i]) ? "enabled" : "disabled").appendTo(ui.tagWindow);
+        }
     };
 
     /**
@@ -37,6 +50,7 @@ define(['underscore', 'jquery'], function(_, $) {
         var title = $("<div></div>").addClass("header").appendTo(x);
         $("<span></span>").addClass("box").addClass("time").text("<time>").appendTo(title);
         $("<span></span>").addClass("title").text(group.id + " ").appendTo(title);
+        $("<span></span>").addClass("exposed").appendTo(title);
         $("<span></span>")
             .addClass("box")
             .addClass("toggle")
@@ -90,6 +104,17 @@ define(['underscore', 'jquery'], function(_, $) {
 
         // Updating shared tags
         groupDom.children(".header").find(".sharedTags").text(group.getSharedTags().join(", "));
+
+        // Updating exposed
+        var eList = [];
+        for (var x in group.exposed) {
+            if (group.exposed.hasOwnProperty(x)) {
+                eList.push(x);
+            }
+        }
+        if (eList.length > 0) {
+            groupDom.children(".header").children(".exposed").html("<span>" + eList.join(" ") + "</span>");
+        }
     };
 
     /**
@@ -107,10 +132,10 @@ define(['underscore', 'jquery'], function(_, $) {
             .text(ui.util.formatTimeForEntry(entry.receivedAt))
             .click(ui.toggleEntry)
             .appendTo(dom);
-        if (entry.hasException()) {
+        if (entry.exception !== null) {
             $('<span></span>').addClass('exception').text('err').appendTo(dom);
         }
-        $('<span></span>').addClass("message").text(entry.getShortMessage()).appendTo(dom);
+        $('<span></span>').addClass("message").text(entry.message).appendTo(dom);
 
         return dom;
     };
@@ -124,7 +149,7 @@ define(['underscore', 'jquery'], function(_, $) {
             .text(ui.util.formatTimeForEntry(entry.receivedAt))
             .click(ui.toggleEntry)
             .appendTo(dom);
-        if (entry.hasPerformanceLog()) {
+        if (entry.perf !== null) {
             $("<span class='var-value-float box'>" + ui.util.millisTime(entry.object.time) + "</span>").appendTo(dom);
         }
         $("<span class='var-value-sql'>" + entry.object.sql + "</span>").appendTo(dom);
@@ -179,7 +204,7 @@ define(['underscore', 'jquery'], function(_, $) {
 
             // Building
             for (var i=0; i < group.items.length; i++) {
-                if (!group.items[i].hasSql()) {
+                if (group.items[i].sql === null) {
                     continue;
                 }
                 ui.buildSqlEntry(group.items[i]).appendTo(content);
@@ -204,7 +229,7 @@ define(['underscore', 'jquery'], function(_, $) {
 
             // Building
             for (var i=0; i < group.items.length; i++) {
-                if (!group.items[i].hasException()) {
+                if (group.items[i] === null) {
                     continue;
                 }
                 ui.buildLogEntry(group.items[i]).appendTo(content);
@@ -248,44 +273,37 @@ define(['underscore', 'jquery'], function(_, $) {
     ui.buildEntryDetails = function buildEntryDetails(entry) {
         var dom = $('<div></div>').addClass("details");
 
-        $("<span class='var-name-internal'>Eos ID</span><span class='var-value'>" + entry.getId() + "</span><br />").appendTo(dom);
+        $("<span class='var-name-internal'>Eos ID</span><span class='var-value'>" + entry.tracking + "</span><br />").appendTo(dom);
         $("<span class='var-name-internal'>Key</span><span class='var-value'>" + entry.key.key + "</span><br />").appendTo(dom);
         if (entry.key.tags.length > 0) {
             $("<span class='var-name-internal'>Tags</span><span class='var-value'>" + entry.key.tags.join(", ") + "</span><br />").appendTo(dom);
         }
 
-        if (_.isObject(entry.object)) {
-            // Building data details
+        if (entry.perf) {
+            $("<span class='var-name'>Time</span><span class='var-value-float'>" + ui.util.millisTime(entry.perf) + "</span>").appendTo(dom);
+        }
 
-            if (entry.object.time || entry.object.count) {
-                if (entry.object.time) {
-                    $("<span class='var-name'>Time</span><span class='var-value-float'>" + ui.util.millisTime(entry.object.time) + "</span>").appendTo(dom);
-                }
-                if (typeof entry.object.count != 'undefined') {
-                    $("<span class='var-name'>Count</span><span class='var-value-int'>" + entry.object.count + "</span>").appendTo(dom);
-                }
+        if (entry.vars.count) {
+            $("<span class='var-name'>Count</span><span class='var-value-int'>" + entry.vars.count + "</span>").appendTo(dom);
+        }
+
+        if (entry.sql) {
+            $("<span class='var-name'>SQL</span><span class='var-value-sql'>" + entry.sql + "</span><br />").appendTo(dom);
+        }
+
+        if (entry.exception) {
+            $("<span class='var-name'>Exception</span><span class='var-value-exception'>" + entry.exception.message + "</span><br />").appendTo(dom);
+            $("<span class='var-name'>Exception place</span><span class='var-value-exception'>" + entry.exception.line + "@" + entry.exception.file + "</span><br />").appendTo(dom);
+            for (var i=0; i < entry.object.exception.trace.length; i++ ) {
+                $("<span class='var-trace-line'></span>").text(entry.exception.trace[i].line).appendTo(dom);
+                $("<span class='var-trace-file'></span>").text(entry.exception.trace[i].file).appendTo(dom);
                 $("<br />").appendTo(dom);
             }
-            if (entry.object.sql) {
-                $("<span class='var-name'>SQL</span><span class='var-value-sql'>" + entry.object.sql + "</span><br />").appendTo(dom);
-            }
-            if (entry.object.exception) {
-                $("<span class='var-name'>Exception</span><span class='var-value-exception'>" + entry.object.exception.message + "</span><br />").appendTo(dom);
-                for (var i=0; i < entry.object.exception.trace.length; i++ ) {
-                    $("<span class='var-trace-line'></span>").text(entry.object.exception.trace[i].line).appendTo(dom);
-                    $("<span class='var-trace-file'></span>").text(entry.object.exception.trace[i].file).appendTo(dom);
-                    $("<br />").appendTo(dom);
-                }
-            }
+        }
 
-            // Iterating over other fields
-            for (var index in entry.object) {
-                if (index == 'eos-id' || index == 'message' || index == 'time' || index == 'sql' || index == 'count' || index == 'exception') {
-                    // already displayed
-                    continue;
-                }
-                $("<span class='var-name'>" + index + "</span><span class='var-value'>" + entry.object[index] + "</span><br />").appendTo(dom);
-            }
+        // Iterating over other fields
+        for (var index in entry.vars) {
+            $("<span class='var-name'>" + index + "</span><span class='var-value'>" + entry.vars[index] + "</span><br />").appendTo(dom);
         }
 
         return dom;
@@ -313,7 +331,7 @@ define(['underscore', 'jquery'], function(_, $) {
         } else {
             return floatTime.toFixed(4);
         }
-    }
+    };
 
     /**
      * Formats time using default Eos formatter
@@ -335,7 +353,7 @@ define(['underscore', 'jquery'], function(_, $) {
         if (!places) places = 2;
         var zero = places - num.toString().length + 1;
         return new Array(+(zero > 0 && zero)).join("0") + num;
-    }
+    };
 
     return ui;
 });

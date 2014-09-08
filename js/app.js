@@ -3,13 +3,20 @@ require.config({
     paths: {
         jquery: 'http://cdn.jsdelivr.net/jquery/2.1.1/jquery.min',
         underscore: 'http://cdn.jsdelivr.net/underscorejs/1.6.0/underscore-min',
+        sha256: 'http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256',
         eventemitter: 'lib/eventemitter2',
         inherits: 'lib/inherits',
+        eoslogentry: 'eos/logentry',
+        eosloggroup: 'eos/loggroup',
+        eoskey: 'eos/key',
         eos: 'eos'
     },
     shim: {
         'underscore': {
             exports: '_'
+        },
+        'sha256': {
+            exports: 'CryptoJS'
         }
     }
 });
@@ -25,7 +32,11 @@ require(
 
         // Binding UI
         ui.logWindow      = $('#logWindow');
+        ui.tagWindow      = $('#tagWindow');
         var dsnInput      = $('#dsn');
+        var tagInput      = $('#tag');
+        var realmInput    = $('#realm');
+        var secretInput   = $('#secret');
         var connectButton = $('#connect');
         var clearButton   = $('#clearButton');
 
@@ -34,7 +45,8 @@ require(
                 eos.disconnect();
             } else {
                 var split = dsnInput.val().split(":");
-                eos.connect(split[0], split[1]);
+                eos.connect(split[0], split[1], tagInput.val(), realmInput.val(), secretInput.val());
+                secretInput.val("");
             }
         });
 
@@ -50,9 +62,12 @@ require(
 
         // Registering events
 //        eos.on("log", function(payload) { console.debug(payload); });
-//        eos.on("debug", function(payload) { console.debug(payload); });
+//        eos.on("debug", eos.logSelf);
         eos.on("disconnect", function(){
             dsnInput.prop('disabled', false);
+            tagInput.prop('disabled', false);
+            realmInput.prop('disabled', false);
+            secretInput.prop('disabled', false);
             connectButton.attr("value", "connect");
         });
         eos.on("connected", function(){
@@ -61,10 +76,16 @@ require(
                 localStorage.setItem("lastDsn", dsnInput.val());
             }
             dsnInput.prop('disabled', true);
+            tagInput.prop('disabled', true);
+            realmInput.prop('disabled', true);
+            secretInput.prop('disabled', true);
             connectButton.attr("value", "disconnect");
         });
         eos.on("newLogEntry", function(data) {
             ui.updateGroup(data.group);
+        });
+        eos.on("newTag", function(pool) {
+            ui.rebuildTagsList(pool);
         });
 
         eos.disconnect();
@@ -73,6 +94,5 @@ require(
             eos.logSelf("Reading previous success dsn " + localStorage.getItem("lastDsn"));
             dsnInput.val(localStorage.getItem("lastDsn"));
         }
-
     }
 );
