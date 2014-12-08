@@ -40,6 +40,37 @@ require(
         var connectButton = $('#connect');
         var clearButton   = $('#clearButton');
 
+
+        var getParam = function (sParam) {
+            var sPageURL = window.location.search.substring(1);
+            var sURLVariables = sPageURL.split('&');
+            for (var i = 0; i < sURLVariables.length; i++)
+            {
+                var sParameterName = sURLVariables[i].split('=');
+                if (sParameterName[0] == sParam)
+                {
+                    return sParameterName[1];
+                }
+            }
+            return '';
+        };
+
+        var eos_ip = getParam('eosip');
+        var eos_login = getParam('login');
+        var eos_password = getParam('password');
+
+        if(eos_ip) {
+            dsnInput.val(eos_ip.trim());
+        }
+
+        if (eos_login) {
+            realmInput.val(eos_login.trim());
+        }
+
+        if (eos_password) {
+            secretInput.val(eos_password.trim());
+        }
+
         connectButton.click(function(){
             if (eos.connected) {
                 eos.disconnect();
