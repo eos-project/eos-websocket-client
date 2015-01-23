@@ -56,7 +56,7 @@ define("EosConnection",
         this.socket.onclose = function onclose() {
             self.wait   = false;
             self.socket = null;
-            this.emit("disconnected");
+            self.emit("disconnected");
             U.log(self.name + " closed connection", arguments);
         };
         this.socket.onmessage = this.onMessage.bind(this);
