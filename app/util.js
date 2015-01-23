@@ -63,6 +63,9 @@ define("util", [], function() {
 
         var emit = function emit(name, data)
         {
+            if (!this[key]) {
+                this[key] = {};
+            }
             if (this[key][name]) {
                 for (var i=0; i < this[key][name].length; i++) {
                     nextTick(this[key][name][i], [data]);
@@ -79,6 +82,9 @@ define("util", [], function() {
                 throw "Callback must be string";
             }
 
+            if (!this[key]) {
+                this[key] = {};
+            }
             if (!this[key][name]) {
                 this[key][name] = [];
             }
@@ -88,7 +94,6 @@ define("util", [], function() {
 
         return function inject(target)
         {
-            target[key] = {};
             target.emit = emit;
             target.on   = on;
         };
