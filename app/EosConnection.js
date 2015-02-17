@@ -27,6 +27,13 @@ define("EosConnection",
 
     U.injectEE(EosConnection.prototype);
 
+
+    /**
+     * Establishes connection to remote EOS server
+     *
+     * @param callback
+     * @returns {*}
+     */
     EosConnection.prototype.connect = function connect(callback)
     {
         if (this.socket !== null) {
@@ -62,6 +69,11 @@ define("EosConnection",
         this.socket.onmessage = this.onMessage.bind(this);
     };
 
+    /**
+     * Close EOS connection
+     *
+     * @returns {*}
+     */
     EosConnection.prototype.close = function close()
     {
         if (this.socket === null) {
@@ -78,6 +90,12 @@ define("EosConnection",
         U.log(this.name + " closed connection manually");
     };
 
+    /**
+     * Callback to invoke on incoming message
+     *
+     * @param packet
+     * @returns {*}
+     */
     EosConnection.prototype.onMessage = function onMessage(packet)
     {
         var chunks = packet.data.split("\n");
