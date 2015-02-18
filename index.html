@@ -3,13 +3,26 @@
         <title>Eos Websocket client</title>
         <link href='http://fonts.googleapis.com/css?family=Roboto&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
         <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700&subset=cyrillic-ext,cyrillic,latin' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" href="css/themes/holo.css">
-        <link rel="stylesheet" href="css/terminal.css">
+        <link rel="stylesheet" href="css/main.css">
         <script
                 data-main="app.js"
                 src="http://cdn.jsdelivr.net/requirejs/2.1.14/require.min.js"></script>
     </head>
     <body>
-
+        <div class="panel">
+            <input type="checkbox" id="showTime" value="yes" /><label for="showTime">Show time</label>
+            <select id="minLevel">
+                <option value="1">TRACE</option>
+                <option value="2">DEBUG</option>
+                <option value="3">INFO</option>
+                <option value="4">NOTICE</option>
+                <option value="5">WARN</option>
+                <option value="6">ERROR</option>
+                <option value="7">ALERT</option>
+                <option value="8">CRITICAL</option>
+                <option value="9">EMERGENCY</option>
+            </select>
+        </div>
+        <div id="Terminal" class="terminal"></div>
     </body>
 </html>

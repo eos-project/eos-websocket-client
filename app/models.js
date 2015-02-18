@@ -23,6 +23,43 @@ define("models", ["util"], function(U) {
         // Tag list
         this.tags = (payload.tags && payload.tags.length > 0) ? payload.tags : [];
 
+        var tl = this.tags.map(function(x) {return x.trim().toLowerCase();});
+        
+        this.error = false;
+        this.level = 'info';
+        this.intLevel = 3;
+
+        if (tl.indexOf('emergency') > -1) {
+            this.error = true;
+            this.intLevel = 9;
+            this.level = 'emergency';
+        } else if (tl.indexOf('alert') > -1) {
+            this.error = true;
+            this.intLevel = 8;
+            this.level = 'alert';
+        } else if (tl.indexOf('critical') > -1) {
+            this.error = true;
+            this.intLevel = 7;
+            this.level = 'critical';
+        } else if (tl.indexOf('error') > -1) {
+            this.error = true;
+            this.intLevel = 6;
+            this.level = 'error';
+        } else if (tl.indexOf('warning') > -1 || tl.indexOf('warn') > -1) {
+            this.error = true;
+            this.intLevel = 5;
+            this.level = 'warning';
+        } else if (tl.indexOf('notice') > -1) {
+            this.intLevel = 4;
+            this.level = 'notice';
+        } else if (tl.indexOf('debug') > -1) {
+            this.intLevel = 2;
+            this.level = 'debug';
+        } else if (tl.indexOf('trace') > -1) {
+            this.intLevel = 1;
+            this.level = 'trace';
+        }
+
         // Variables map
         this.vars = payload || {};
 
@@ -96,7 +133,19 @@ define("models", ["util"], function(U) {
      */
     List.prototype.size = function size()
     {
-        return this.data.size();
+        return this.data.length;
+    };
+
+    /**
+     * Applies callback to each item in list in synchronous mode
+     *
+     * @param {function} callback
+     */
+    List.prototype.eachSync = function eachSync(callback)
+    {
+        for (var i=0; i < this.data.length; i++) {
+            callback(this.data[i])
+        }
     };
 
     return {
