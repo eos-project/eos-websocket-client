@@ -135,9 +135,39 @@ define(['underscore', 'jquery'], function(_, $) {
         if (entry.exception !== null) {
             $('<span></span>').addClass('exception').text('err').appendTo(dom);
         }
-        $('<span></span>').addClass("message").text(entry.message).appendTo(dom);
+        $('<span></span>').addClass("message").html(ui.spanInterpolation(entry.message, entry.vars)).appendTo(dom);
 
         return dom;
+    };
+
+    ui.spanInterpolation = function spanInterpolation(str, map)
+    {
+        str = ((str || '') + '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        if (typeof map !== 'object') {
+            return str;
+        }
+
+        console.error(str);
+
+        str = str.replace(/[ ,\.]:([0-9a-z\.\-]+)/ig, function(a, g){
+            console.log(a, g);
+            if (!map.hasOwnProperty(g)) {
+                return ' <span class="missing">' + a + '</span>';
+            }
+
+            if (typeof map[g] === 'number') {
+                return ' <span class="number">' + map[g] + '</span>';
+            }
+            if (typeof map[g] === 'boolean') {
+                return ' <span class="boolean">' + (map[g] ? 'true' : 'false') + '</span>';
+            }
+
+            return ' <span class="string">' + map[g] + '</span>';
+        });
+
+        console.error(str, map);
+        return str;
     };
 
     ui.buildSqlEntry = function buildSqlEntry(entry) {

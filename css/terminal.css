@@ -42,6 +42,10 @@ Cyan: #66d9ef
 #logWindow .group .entry span.time::before { content: " ["; color: #AAA;}
 #logWindow .group .entry span.time::after { content: "] "; color: #AAA;}
 #logWindow .group .entry span.message { color: #AAA; font-weight: bold; }
+#logWindow .group .entry span.message .string { color: #7ca223; }
+#logWindow .group .entry span.message .boolean { color: #97004c; }
+#logWindow .group .entry span.message .number { color: #57bcd1; }
+#logWindow .group .entry span.message .missing { text-decoration: underline; font-weight: normal; }
 
 #logWindow .group .entry .details { margin-left: 10px; border-left: 7px solid #222; padding: 0 5px 15px 5px; }
 #logWindow .group .entry .var-value { color: #a6e22e; }
