@@ -148,10 +148,7 @@ define(['underscore', 'jquery'], function(_, $) {
             return str;
         }
 
-        console.error(str);
-
         str = str.replace(/[ ,\.]:([0-9a-z\.\-]+)/ig, function(a, g){
-            console.log(a, g);
             if (!map.hasOwnProperty(g)) {
                 return ' <span class="missing">' + a + '</span>';
             }
@@ -166,7 +163,6 @@ define(['underscore', 'jquery'], function(_, $) {
             return ' <span class="string">' + map[g] + '</span>';
         });
 
-        console.error(str, map);
         return str;
     };
 
