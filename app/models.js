@@ -46,7 +46,7 @@ define("models", ["util"], function(U) {
             this.intLevel = 6;
             this.level = 'error';
         } else if (tl.indexOf('warning') > -1 || tl.indexOf('warn') > -1) {
-            this.error = true;
+            this.error = false;
             this.intLevel = 5;
             this.level = 'warning';
         } else if (tl.indexOf('notice') > -1) {
@@ -62,6 +62,12 @@ define("models", ["util"], function(U) {
 
         // Variables map
         this.vars = payload || {};
+
+        // Expose markers
+        this.expose = [];
+        if (this.vars.expose) {
+            this.expose.push(this.vars.expose);
+        }
 
         // Capabilities list
         this.features = {};

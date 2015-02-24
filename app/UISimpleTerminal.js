@@ -40,8 +40,20 @@ define(['jquery', 'models'], function($, Models) {
         this.list.eachSync(onMessage.bind(this));
     };
 
-    // todo
-    var onClear = function onClear() {};
+    var onClear = function onClear() {
+
+        if (this.groupsCount > 0) {
+            for (var k in this.groups) {
+                if (this.groups.hasOwnProperty(k)) {
+                    this.groups[k].clear();
+                    this.groups[k].$container.remove();
+                }
+            }
+        }
+
+        this.groupsCount = 0;
+        this.groups = {};
+    };
 
     /**
      * Callback, invoked when new message received
@@ -62,14 +74,16 @@ define(['jquery', 'models'], function($, Models) {
             group.$count     = $('<span></span>').addClass('count').appendTo(group.$header);
             group.$countErr  = $('<span></span>').addClass('countErr').appendTo(group.$header);
             group.$name      = $('<span></span>').addClass('name').appendTo(group.$header);
+            group.$expose    = $('<span></span>').addClass('expose').appendTo(group.$header);
             group.$content   = $('<div></div>').addClass('content').appendTo(group.$container);
 
             group.$ui = {
                 showTime: this.showTime,
                 minLevel: this.minLevel,
+                expose: new Set(),
                 folded: true,
                 shown: 0,
-                firstTime: new Date()
+                firstTime: null
             };
 
             // Filling defaults
@@ -83,9 +97,11 @@ define(['jquery', 'models'], function($, Models) {
                         appendEntry(group, e);
                     });
                     group.$ui.folded = false;
+                    group.$content.css('display', 'block');
                 } else {
                     group.$content.empty();
                     group.$ui.folded = true;
+                    group.$content.css('display', 'none');
                 }
             });
 
@@ -96,6 +112,8 @@ define(['jquery', 'models'], function($, Models) {
             // Registering new group
             this.groupsCount++;
             this.groups[groupName] = group;
+
+            document.title = '[' + this.groupsCount + '] Eos';
         }
 
         this.groups[groupName].push(entry);
@@ -108,14 +126,29 @@ define(['jquery', 'models'], function($, Models) {
      */
     var onMessageInsideGroup = function onMessageInsideGroup(entry)
     {
+        if (this.$ui.firstTime === null) {
+            this.$ui.firstTime = entry.client.time;
+        }
+
         var deltaMs = entry.client.time.getTime() - this.$ui.firstTime.getTime();
 
-        this.$time.html(lpad('Δ ' + (deltaMs / 1000).toFixed(2) + 's', 8, '&nbsp;'));
+        this.$time.html(lpad((deltaMs / 1000).toFixed(2) + 's', 6, '&nbsp;'));
         if (entry.intLevel >= this.$ui.minLevel) this.$ui.shown++;
+
+        // Adding expose
+        if (entry.expose.length > 0) {
+            for (var i=0; i < entry.expose.length; i++) {
+                this.$ui.expose.add(entry.expose[i]);
+            }
+            var buffer = [];
+            this.$ui.expose.forEach(function(x) {buffer.push(x)});
+            this.$expose.text(buffer.join(', '));
+        }
+
         if (this.$ui.shown === this.size()) {
-            this.$count.html(lpad(this.size(), 3, '&nbsp;'));
+            this.$count.html(lpad(this.size(), 5, '&nbsp;'));
         } else {
-            this.$count.html(lpad(this.$ui.shown + '/' + this.size(), 5, '&nbsp;'));
+            this.$count.html(lpad(this.$ui.shown + '/' + this.size(), 7, '&nbsp;'));
         }
         if (!this.$ui.folded) {
             if (entry.intLevel < this.$ui.minLevel) return;
@@ -131,11 +164,18 @@ define(['jquery', 'models'], function($, Models) {
      */
     var appendEntry = function appendEntry(group, entry)
     {
-
         var $dom = $('<div></div>').addClass(entry.level).appendTo(group.$content);
 
         if (group.$ui.showTime) {
             $('<span></span>').addClass('time').text( entry.client.time.toISOString().substring(11,23)).appendTo($dom);
+        }
+
+        if (typeof entry.vars.time === 'number') {
+            $('<span></span>').addClass('delta').text((entry.vars.time * 1000.).toFixed(1) + 'ms').appendTo($dom);
+        }
+
+        if (typeof entry.vars.sql === 'string') {
+            $('<span></span>').addClass('automarker').text('SQL').appendTo($dom);
         }
 
         $('<span></span>').addClass('message').click(function() {$(this).parent().find('.details').toggle();}).html(spanInterpolation(entry.message, entry.vars)).appendTo($dom);
@@ -195,8 +235,18 @@ define(['jquery', 'models'], function($, Models) {
      */
     var eosIdGrouper = function eosIdGrouper(entry)
     {
-        return entry && entry.vars && typeof entry.vars['eos-id'] === 'string' ? entry.vars['eos-id'] : '<undefined>';
+        var name = entry && entry.vars && typeof entry.vars['eos-id'] === 'string' ? entry.vars['eos-id'] : '<undefined>';
+        if (name === 'EosClient') {
+            return name;
+        }
+        if (!eosIdGrouper.map.hasOwnProperty(name)) {
+            eosIdGrouper.map[name] = 'EOS Session ' + eosIdGrouper.last++ ;
+        }
+
+        return eosIdGrouper.map[name];
     };
+    eosIdGrouper.last = 1;
+    eosIdGrouper.map  = {};
 
     return Terminal;
 

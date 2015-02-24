@@ -20,12 +20,38 @@ define("EntryFactory", ["models", "util"], function(Models, U) {
     {
         var e = new Models.Entry({
             message: text,
-            tags: [EntryFactory.localTag]
+            'eos-id': EntryFactory.localTag
         });
+
 
         if (target && (target instanceof Models.List)) {
             target.push(e);
         }
+
+        return e;
+    };
+
+    /**
+     * Creates and returns message
+     *
+     * @param {string} text
+     * @param {List=}  target
+     * @return {Entry}
+     */
+    EntryFactory.localError = function localError(text, target)
+    {
+        var e = new Models.Entry({
+            message: text,
+            tags: ['error'],
+            'eos-id': EntryFactory.localTag
+        });
+
+
+        if (target && (target instanceof Models.List)) {
+            target.push(e);
+        }
+
+        return e;
     };
 
     EntryFactory.websocket1 = function websocket1(packet)

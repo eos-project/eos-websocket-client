@@ -31,29 +31,37 @@ require(['util', 'models', 'EntryFactory', 'EosConnection', 'UISimpleTerminal', 
         ui.repaint();
     });
 
-    F.localMessage('Starting EOS application', globals);
-    F.localMessage('Pre-initialization done', globals);
+    $('#fontSize').click(function(){ $('body').toggleClass('largeFont'); });
+    $('#clearAll').click(function(){ var size = globals.size(); globals.clear(); F.localMessage('Cleared ' + size + ' messages', globals); });
 
-    // Creating EOS connection
-    var eos = new C({host: '', realm: '', secret: ''});
-    eos.on("message", function(e){ console.log(e); globals.push(e) });
-    eos.connect();
+    F.localMessage('Starting client application', globals);
 
-    // Testing
-    globals.push(new Models.Entry({message: 'Test trace', tags:['trace', 'zzz', 'xxx']}));
-    globals.push(new Models.Entry({message: 'Test debug', tags:['debug', 'foo', 'bar']}));
-    globals.push(new Models.Entry({message: 'Test info for :name with ID :id and active :active and :more', tags:['info'], id: 15, name: 'Jessy', active: true}));
-    globals.push(new Models.Entry({message: 'Test notice', tags:['notice']}));
-    globals.push(new Models.Entry({message: 'Test warn', tags:['warn']}));
-    globals.push(new Models.Entry({message: 'Test error', tags:['error']}));
-    globals.push(new Models.Entry({message: 'Test warning', tags:['warning']}));
-    globals.push(new Models.Entry({message: 'Test alert', tags:['alert']}));
-    globals.push(new Models.Entry({message: 'Test emergency', tags:['emergency']}));
-    globals.push(new Models.Entry({message: 'Test critical', tags:['critical']}));
+    // Reading optins
+    var hash = window.location.hash.substring(1).split('&');
+    var opts = {};
+    for (var i=0; i < hash.length; i++) {
+        var j = hash[i].split('=');
+        opts[j[0]] = j[1];
+    }
 
-    //setInterval(function(){
-    //    F.localMessage('Tic tac', globals);
-    //}, 1000);
+    if (opts.large) {
+        $('body').addClass('largeFont');
+    }
+    if (opts.level) {
+        $('#minLevel').val(opts.level);
+        $('#minLevel').change();
+    }
 
-    U.dump(globals);
+    if (opts.host && opts.realm && opts.secret) {
+        var eos = new C({host: opts.host, port: opts.port, realm: opts.realm, secret: opts.secret});
+        eos.on("log", function(text) {F.localMessage(text, globals)});
+        eos.on("error", function(text) {F.localError(text, globals)});
+        eos.on("message", function(e){ globals.push(e) });
+        eos.connect();
+    } else {
+        F.localError(
+            'Unable to read EOS connection configuration. Url must be like #host=&realm=&secret=',
+            globals
+        );
+    }
 });

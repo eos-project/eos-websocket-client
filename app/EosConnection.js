@@ -23,6 +23,8 @@ define("EosConnection",
         this.realm  = options.realm;
         this.secret = options.secret;
         this.filter = options.filter || "";
+        this.auto   = true;
+        this.retries = 0;
     };
 
     U.injectEE(EosConnection.prototype);
@@ -48,23 +50,28 @@ define("EosConnection",
         var uri  = "ws://" + this.server + ":" + this.port;
         var self = this;
         this.socket = new WebSocket(uri);
-        U.log(this.name + " connecting to " + uri);
+        this.emit("log", this.name + " connecting to " + uri);
 
         this.socket.onopen  = function onopen() {
-            U.log(self.name + " successfully connected");
+            self.emit("log", self.name + " successfully connected");
             U.deliver(null, true, callback);
         };
         this.socket.onerror = function onerror() {
             self.wait   = false;
             self.socket = null;
-            U.log(self.name + " caught an error", arguments);
+            self.emit("error", self.name + " caught an error", arguments);
             U.deliver("Connection error", null, callback);
         };
         this.socket.onclose = function onclose() {
             self.wait   = false;
             self.socket = null;
+            self.emit("log", "Disconnected");
             self.emit("disconnected");
-            U.log(self.name + " closed connection", arguments);
+            self.emit("log", self.name + " closed connection", arguments);
+            if (self.retries > 0) {
+                self.emit("log", "Auto-reconnect #" + self.retries--);
+                self.connect();
+            }
         };
         this.socket.onmessage = this.onMessage.bind(this);
     };
@@ -86,8 +93,9 @@ define("EosConnection",
         this.socket.close();
         this.wait   = false;
         this.socket = null;
+        this.retries = 0;
         this.emit("disconnected");
-        U.log(this.name + " closed connection manually");
+        this.emit("log", this.name + " closed connection manually");
     };
 
     /**
@@ -105,13 +113,15 @@ define("EosConnection",
             case "log":
                 return this.onPacketLog(chunks.slice(1));
             case "error":
-                U.console.warn("Received error in " + this.name, packet);
+                this.emit("error", "Received error in " + this.name);
+                this.emit("error", JSON.stringify(chunks));
                 this.wait = false;
                 this.close();
                 return null;
             case "connected":
                 this.wait = false;
-                U.console.info("Handshake success, ready for work");
+                if (this.auto) this.retries = 5;
+                this.emit("log", "Handshake success, ready for work");
                 this.emit("connected");
                 return null;
             default:
@@ -129,8 +139,7 @@ define("EosConnection",
     EosConnection.prototype.onPacketUuid = function onPacketUuid(packet) {
         this.uuid  = packet[0];
         var shake = this.getHandshakePacket();
-        U.log("Auth UUID is " + this.uuid + " starting handshake");
-        U.log("Handshake is ", shake);
+        this.emit("log", "Auth UUID is " + this.uuid + " starting handshake");
         this.socket.send(shake.join("\n"));
     };
 

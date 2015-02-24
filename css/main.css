@@ -1,14 +1,22 @@
 body {background-color: #222222; margin: 0; padding: 0; font-family: "Monaco", "Ubuntu Mono"; font-size: 9pt;}
 
-.panel { background-color: #333333; border-bottom: 2px solid darkolivegreen; padding: 3pt; color: snow; }
+.largeFont {font-size: 13pt;}
 
-.terminal { font-family: "Monaco", "Ubuntu Mono", monospace; color: white; font-size: 9pt; }
-.terminal section.group .name { color: #398439; cursor: pointer; }
+.panel { background-color: #333333; border-bottom: 2px solid darkolivegreen; padding: 3pt; color: snow; font-size: 12pt; }
+
+.terminal { font-family: "Monaco", "Ubuntu Mono", monospace; color: white;}
+.terminal section {margin: 0; padding: 0;}
+.terminal section.group .name { color: #398439; cursor: pointer; display: inline-block; margin: 0 0.5em; }
+.terminal section.group .expose { font-weight: bold; color: #a6e22e; }
 .terminal section.group .name:hover { color: #a6e22e; }
-.terminal section.group .count { color: #0099cc; display: inline-block; margin: 0 0.5em; }
-.terminal section.group .time { color: darkslateblue; display: inline-block; margin: 0 0.5em; }
-.terminal section.group .content {padding: 0 0 2em 1em;}
+.terminal section.group .count { color: #0099cc; font-weight: bold; display: inline-block; margin: 0 0.5em; }
+.terminal section.group .time { color: #0099cc; display: inline-block; margin: 0 0.5em; }
+.terminal section.group .content {padding: 0 0 2em 1em; display: none;}
 
+.terminal section.group .content > div:hover { background-color: #333333; }
+.terminal section.group .content .time { display: inline; margin: 0 0.5em; }
+.terminal section.group .content .delta { color: #0099cc; float: right; margin: 0 0.5em; }
+.terminal section.group .content .automarker { color: #c3cc37; float: right; margin: 0 0.5em; }
 .terminal section.group .content .message { color: darkkhaki; cursor: pointer; }
 .terminal section.group .content .message:hover {color: white !important; opacity: 1 !important;}
 .terminal section.group .content .message .number { color: #0099cc; }
@@ -20,8 +28,8 @@ body {background-color: #222222; margin: 0; padding: 0; font-family: "Monaco", "
 .terminal section.group .content .warning .message {color: coral; }
 .terminal section.group .content .error .message {color: coral; }
 .terminal section.group .content .alert .message {color: crimson; font-weight: bold; }
-.terminal section.group .content .critical .message {color: crimson; font-weight: bold; }
-.terminal section.group .content .emergency .message {color: crimson; font-weight: bold; }
+.terminal section.group .content .critical .message {color: white; background-color: crimson; font-weight: bold; }
+.terminal section.group .content .emergency .message {color: white; background-color: crimson; font-weight: bold; }
 
 .terminal .content ul.details {background-color: #333333; margin: 0 0 0 2em; padding: 0; list-style: none; display: none; }
 .terminal .content ul.details .name {min-width: 6em; display: inline-block; margin-right: 1em;}
