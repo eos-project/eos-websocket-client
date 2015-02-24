@@ -69,6 +69,38 @@ define("models", ["util"], function(U) {
             this.expose.push(this.vars.expose);
         }
 
+        // Building exceptions
+        this.exceptions = [];
+        if (this.vars.exception) {
+            if (Object.prototype.toString.call(this.vars.exception) !== '[object Array]') {
+                this.vars.exception = [this.vars.exception];
+            }
+
+            for (var i=0; i < this.vars.exception.length; i++) {
+                var j = this.vars.exception[i];
+                var e = {};
+
+                e.code    = j.code || 0;
+                e.message = j.message || null;
+                e.class   = j.class || null;
+                e.trace   = [];
+                if (j.trace && j.trace.length > 0) {
+                    for (var ti = 0; ti < j.trace.length; ti++) {
+                        e.trace.push({
+                            line: j.trace[ti].line | 0,
+                            file: j.trace[ti].file || '-- unknown --'
+                        });
+                    }
+                }
+
+                this.exceptions.push(e);
+            }
+        }
+
+        if (this.vars.exception) {
+            console.log(this.vars.exception, this.exceptions);
+        }
+
         // Capabilities list
         this.features = {};
     };

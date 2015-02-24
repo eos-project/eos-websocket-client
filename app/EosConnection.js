@@ -25,6 +25,7 @@ define("EosConnection",
         this.filter = options.filter || "";
         this.auto   = true;
         this.retries = 0;
+        this.served  = 0;
     };
 
     U.injectEE(EosConnection.prototype);
@@ -161,6 +162,10 @@ define("EosConnection",
      * @param {string[]} packet
      */
     EosConnection.prototype.onPacketLog = function onPacketLog(packet) {
+        this.served++;
+        if (this.served % 1000 === 0) {
+            this.emit("log", "Served " + this.served + " messages");
+        }
         this.emit("message", EntryFactory.websocket1(packet));
     };
 

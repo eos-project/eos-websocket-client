@@ -33,3 +33,12 @@ body {background-color: #222222; margin: 0; padding: 0; font-family: "Monaco", "
 
 .terminal .content ul.details {background-color: #333333; margin: 0 0 0 2em; padding: 0; list-style: none; display: none; }
 .terminal .content ul.details .name {min-width: 6em; display: inline-block; margin-right: 1em;}
+
+.terminal .content .exception {background-color: #333333; border-left: 3px solid crimson; margin: 0 0 0 2em; display: none;}
+
+.terminal .content .exception ul.meta {padding: 0; list-style: none; }
+.terminal .content .exception ul.meta .name {min-width: 8em; display: inline-block; margin-right: 1em;}
+
+.terminal .content .exception ul.trace {padding: 0; list-style: none; font-size: smaller; }
+.terminal .content .exception ul.trace .line {display: inline-block; margin-right: 1em; color: #0099cc;}
+.terminal .content .exception ul.trace .file {display: inline-block; color: coral;}

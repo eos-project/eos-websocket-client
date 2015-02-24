@@ -164,6 +164,7 @@ define(['jquery', 'models'], function($, Models) {
      */
     var appendEntry = function appendEntry(group, entry)
     {
+        var li;
         var $dom = $('<div></div>').addClass(entry.level).appendTo(group.$content);
 
         if (group.$ui.showTime) {
@@ -178,14 +179,50 @@ define(['jquery', 'models'], function($, Models) {
             $('<span></span>').addClass('automarker').text('SQL').appendTo($dom);
         }
 
-        $('<span></span>').addClass('message').click(function() {$(this).parent().find('.details').toggle();}).html(spanInterpolation(entry.message, entry.vars)).appendTo($dom);
+        $('<span></span>').addClass('message')
+            .click(function() {$(this).parent().find('.details, .exception').toggle();})
+            .html(spanInterpolation(entry.message, entry.vars))
+            .appendTo($dom);
+
         var details = $('<ul></ul>').addClass('details').appendTo($dom);
         for (var key in entry.vars) {
             if (!entry.vars.hasOwnProperty(key)) continue;
 
-            var li = $('<li></li>').appendTo(details);
+            li = $('<li></li>').appendTo(details);
             $('<span></span>').addClass('name').text(key).appendTo(li);
             $('<span></span>').addClass('value').text(entry.vars[key]).appendTo(li);
+        }
+
+        if (entry.exceptions.length > 0) {
+            for (var i=0; i < entry.exceptions.length; i++) {
+                var j = entry.exceptions[i];
+                var $exception = $('<div></div>').addClass('exception').appendTo($dom);
+                var $eMeta = $('<ul></ul>').addClass('meta').appendTo($exception);
+                li;
+
+                if (j.class) {
+                    li = $('<li></li>').appendTo($eMeta);
+                    $('<span></span>').addClass('name').text('Exception class').appendTo(li);
+                    $('<span></span>').addClass('value').text(j.class).appendTo(li);
+                }
+                if (j.code) {
+                    li = $('<li></li>').appendTo($eMeta);
+                    $('<span></span>').addClass('name').text('Exception code').appendTo(li);
+                    $('<span></span>').addClass('value').text(j.code).appendTo(li);
+                }
+                if (j.message) {
+                    li = $('<li></li>').appendTo($eMeta);
+                    $('<span></span>').addClass('name').text('Message').appendTo(li);
+                    $('<span></span>').addClass('value').text(j.message).appendTo(li);
+                }
+
+                var $trace = $('<ul></ul>').addClass('trace').appendTo($exception);
+                for (var ti=0; ti < j.trace.length; ti++) {
+                    li = $('<li></li>').appendTo($trace);
+                    $('<span></span>').addClass('line').html(lpad(j.trace[ti].line, 5, '&nbsp;') + '&nbsp;').appendTo(li);
+                    $('<span></span>').addClass('file').text(j.trace[ti].file).appendTo(li);
+                }
+            }
         }
     };
 
