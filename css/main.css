@@ -16,6 +16,7 @@ body {background-color: #222222; margin: 0; padding: 0; font-family: "Monaco", "
 .terminal section.group .content > div:hover { background-color: #333333; }
 .terminal section.group .content .time { display: inline; margin: 0 0.5em; }
 .terminal section.group .content .delta { color: #0099cc; float: right; margin: 0 0.5em; }
+.terminal section.group .content .size { color: #0099cc; float: right; margin: 0 0.5em; }
 .terminal section.group .content .automarker { color: #c3cc37; float: right; margin: 0 0.5em; }
 .terminal section.group .content .message { color: darkkhaki; cursor: pointer; }
 .terminal section.group .content .message:hover {color: white !important; opacity: 1 !important;}

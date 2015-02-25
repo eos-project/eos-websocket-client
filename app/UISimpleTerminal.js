@@ -178,6 +178,12 @@ define(['jquery', 'models'], function($, Models) {
         if (typeof entry.vars.sql === 'string') {
             $('<span></span>').addClass('automarker').text('SQL').appendTo($dom);
         }
+        if (entry.tags.indexOf('curl') !== -1 || entry.tags.indexOf('http') !== -1) {
+            $('<span></span>').addClass('automarker').text('HTTP').appendTo($dom);
+            if (typeof entry.vars.packetSize === 'number') {
+                $('<span></span>').addClass('size').text(entry.vars.packetSize + ' bytes').appendTo($dom);
+            }
+        }
 
         $('<span></span>').addClass('message')
             .click(function() {$(this).parent().find('.details, .exception').toggle();})
