@@ -10,6 +10,7 @@ body {background-color: #222222; margin: 0; padding: 0; font-family: "Monaco", "
 .terminal section.group .expose { font-weight: bold; color: #a6e22e; }
 .terminal section.group .name:hover { color: #a6e22e; }
 .terminal section.group .count { color: #0099cc; font-weight: bold; display: inline-block; margin: 0 0.5em; }
+.terminal section.group .countErr { color: darkorange; font-weight: bold; margin: 0 0.5em; display: none; }
 .terminal section.group .time { color: #0099cc; display: inline-block; margin: 0 0.5em; }
 .terminal section.group .content {padding: 0 0 2em 1em; display: none;}
 

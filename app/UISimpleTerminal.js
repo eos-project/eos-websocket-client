@@ -8,7 +8,7 @@ define(['jquery', 'models'], function($, Models) {
         options = options || {};
 
         this.$container = $(selector);
-        this.grouping   = options.grouping || eosIdGrouper;
+        this.grouping   = options.grouping || fllGrouper;
         this.showTime   = typeof options.showTime === 'boolean' ? options.showTime : false;
         this.minLevel   = 1;
         this.list = list;
@@ -72,9 +72,9 @@ define(['jquery', 'models'], function($, Models) {
             group.$header    = $('<div></div>').addClass('header').appendTo(group.$container);
             group.$time      = $('<span></span>').addClass('time').appendTo(group.$header);
             group.$count     = $('<span></span>').addClass('count').appendTo(group.$header);
-            group.$countErr  = $('<span></span>').addClass('countErr').appendTo(group.$header);
             group.$name      = $('<span></span>').addClass('name').appendTo(group.$header);
             group.$expose    = $('<span></span>').addClass('expose').appendTo(group.$header);
+            group.$countErr  = $('<span></span>').addClass('countErr').appendTo(group.$header);
             group.$content   = $('<div></div>').addClass('content').appendTo(group.$container);
 
             group.$ui = {
@@ -83,6 +83,7 @@ define(['jquery', 'models'], function($, Models) {
                 expose: new Set(),
                 folded: true,
                 shown: 0,
+                errors: 0,
                 firstTime: null
             };
 
@@ -134,6 +135,7 @@ define(['jquery', 'models'], function($, Models) {
 
         this.$time.html(lpad((deltaMs / 1000).toFixed(2) + 's', 6, '&nbsp;'));
         if (entry.intLevel >= this.$ui.minLevel) this.$ui.shown++;
+        if (entry.error) this.$ui.errors++;
 
         // Adding expose
         if (entry.expose.length > 0) {
@@ -149,6 +151,10 @@ define(['jquery', 'models'], function($, Models) {
             this.$count.html(lpad(this.size(), 5, '&nbsp;'));
         } else {
             this.$count.html(lpad(this.$ui.shown + '/' + this.size(), 7, '&nbsp;'));
+        }
+        if (this.$ui.errors > 0) {
+            this.$countErr.text(this.$ui.errors === 1 ? 'error' : this.$ui.errors + ' errors');
+            this.$countErr.css('display', 'inline-block');
         }
         if (!this.$ui.folded) {
             if (entry.intLevel < this.$ui.minLevel) return;
@@ -273,8 +279,8 @@ define(['jquery', 'models'], function($, Models) {
     /**
      * Returns group name based on eos-id
      *
-     * @param entry
-     * @returns {*}
+     * @param {Entry} entry
+     * @returns {string}
      */
     var eosIdGrouper = function eosIdGrouper(entry)
     {
@@ -290,6 +296,20 @@ define(['jquery', 'models'], function($, Models) {
     };
     eosIdGrouper.last = 1;
     eosIdGrouper.map  = {};
+
+
+    /**
+     * Returns group name for frontend events
+     *
+     * @param {Entry} entry
+     * @returns {string}
+     */
+    var fllGrouper = function fflGrouper(entry)
+    {
+        if (!entry.vars.fflId) return eosIdGrouper(entry);
+
+        return 'Frontend @ ' + entry.vars.ip + ' ' + entry.vars.fflId
+    };
 
     return Terminal;
 
