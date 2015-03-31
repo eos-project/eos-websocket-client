@@ -53,7 +53,7 @@ require(['util', 'models', 'EntryFactory', 'EosConnection', 'UISimpleTerminal', 
     }
 
     if (opts.host && opts.realm && opts.secret) {
-        var eos = new C({host: opts.host, port: opts.port, realm: opts.realm, secret: opts.secret});
+        var eos = new C({host: opts.host, port: opts.port, realm: opts.realm, secret: opts.secret, filter: opts.filter});
         eos.on("log", function(text) {F.localMessage(text, globals)});
         eos.on("error", function(text) {F.localError(text, globals)});
         eos.on("message", function(e){ globals.push(e) });
