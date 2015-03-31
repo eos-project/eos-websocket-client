@@ -63,6 +63,11 @@ define("models", ["util"], function(U) {
         // Variables map
         this.vars = payload || {};
 
+        // Manual level override
+        if (this.vars.level && ['trace','debug','notice','warning','warn','error','critical','alert','emergency'].indexOf(this.vars.level) !== -1) {
+            this.level = this.vars.level;
+        }
+
         // Expose markers
         this.expose = [];
         if (this.vars.expose) {
