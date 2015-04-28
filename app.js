@@ -26,6 +26,10 @@ require(['util', 'models', 'EntryFactory', 'EosConnection', 'UISimpleTerminal', 
         ui.showTime = $(this).prop('checked');
         ui.repaint();
     });
+    $('#autoScroll').change(function() {
+        ui.autoScroll = $(this).prop('checked');
+        ui.repaint();
+    });
     $('#minLevel').change(function(){
         ui.minLevel = $(this).val();
         ui.repaint();
