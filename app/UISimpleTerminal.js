@@ -10,6 +10,7 @@ define(['jquery', 'models'], function($, Models) {
         this.$container = $(selector);
         this.grouping   = options.grouping || fllGrouper;
         this.showTime   = typeof options.showTime === 'boolean' ? options.showTime : false;
+        this.autoScroll = typeof options.autoScroll === 'boolean' ? options.autoScroll : false;
         this.minLevel   = 1;
         this.list = list;
 
@@ -115,6 +116,10 @@ define(['jquery', 'models'], function($, Models) {
             this.groups[groupName] = group;
 
             document.title = '[' + this.groupsCount + '] Eos';
+
+            if (this.autoScroll) {
+                $("html, body").animate({scrollTop: $(document).height()}, 1000);
+            }
         }
 
         this.groups[groupName].push(entry);
