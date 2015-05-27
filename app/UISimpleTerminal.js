@@ -265,7 +265,7 @@ define(['jquery', 'models'], function($, Models) {
 
         if (typeof map !== 'object') return str;
 
-        return str.replace(/[ ,\.]:([0-9a-z\.\-_]+)/ig, function(a, g){
+        return str.replace(/[ ,\.=]:([0-9a-z\.\-_]+[0-9a-z])/ig, function(a, g){
             if (!map.hasOwnProperty(g)) {
                 return ' <span class="missing">' + a + '</span>';
             }
