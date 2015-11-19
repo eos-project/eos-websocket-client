@@ -36,6 +36,7 @@ define(['jquery', 'models'], function($, Models) {
             this.groups[key].$ui.showTime = this.showTime;
             this.groups[key].$ui.minLevel = this.minLevel;
             this.groups[key].$ui.shown    = 0;
+            this.groups[key].$ui.errors   = 0;
         }
 
         this.list.eachSync(onMessage.bind(this));
