@@ -113,7 +113,7 @@ define(
     {
         var nonce   = new Date();
         var payload = this.tag;
-        var hash    = sha.SHA256(nonce + payload + this.secret);
+        var hash    = sha256(nonce + payload + this.secret);
 
         return ["subscribe", this.realm , nonce, payload, hash];
     };

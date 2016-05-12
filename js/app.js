@@ -3,7 +3,7 @@ require.config({
     paths: {
         jquery: 'http://cdn.jsdelivr.net/jquery/2.1.1/jquery.min',
         underscore: 'http://cdn.jsdelivr.net/underscorejs/1.6.0/underscore-min',
-        sha256: 'http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256',
+        sha256: 'lib/sha256.min',
         eventemitter: 'lib/eventemitter2',
         inherits: 'lib/inherits',
         eoslogentry: 'eos/logentry',
@@ -14,9 +14,6 @@ require.config({
     shim: {
         'underscore': {
             exports: '_'
-        },
-        'sha256': {
-            exports: 'CryptoJS'
         }
     }
 });
